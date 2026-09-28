@@ -32,6 +32,7 @@ body {
   --time-bg: var(--forest-green);
   --time-text: var(--warm-cream);
   --time-logo: var(--time-text);
+  --time-accent: #C8A97E;
   --time-gradient: radial-gradient(circle at center top, rgba(255, 255, 255, 0) 0%, transparent 100%);
 
   background-color: var(--time-bg);
@@ -49,6 +50,7 @@ body.time-morning {
   --time-bg: #E8DECC;
   --time-text: #292A25;
   --time-logo: var(--time-text);
+  --time-accent: #9A7650;
   --time-gradient: radial-gradient(circle at 70% 10%, rgba(243, 235, 221, 0.8) 0%, transparent 60%);
 }
 
@@ -56,6 +58,7 @@ body.time-day {
   --time-bg: #F3EBDD;
   --time-text: #183C2C;
   --time-logo: var(--time-text);
+  --time-accent: #9A7650;
   --time-gradient: radial-gradient(circle at center top, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
 }
 
@@ -63,6 +66,7 @@ body.time-golden-hour {
   --time-bg: #D9B88F;
   --time-text: #4A331A;
   --time-logo: var(--forest-green);
+  --time-accent: #4A331A;
   /* Lebih elegan dan menonjol saat senja */
   --time-gradient: radial-gradient(circle at 30% 20%, rgba(212, 175, 55, 0.25) 0%, transparent 75%);
 }
@@ -71,6 +75,7 @@ body.time-night {
   --time-bg: #11281D;
   --time-text: #F3EBDD;
   --time-logo: var(--time-text);
+  --time-accent: #C8A97E;
   --time-gradient: radial-gradient(circle at top right, rgba(243, 235, 221, 0.03) 0%, transparent 80%);
 }
 
@@ -239,7 +244,7 @@ h6 {
 }
 
 .btn-primary:hover {
-  background-color: #C8A97E;
+  background-color: var(--time-accent);
   transform: translateY(-3px);
 }
 
@@ -258,8 +263,8 @@ h6 {
 }
 
 .btn-secondary:hover {
-  color: #C8A97E;
-  border-color: #C8A97E;
+  color: var(--time-accent);
+  border-color: var(--time-accent);
   transform: translateY(-3px);
 }
 
@@ -344,8 +349,8 @@ h6 {
 }
 
 .hero-home .btn-secondary:hover {
-  color: #C8A97E;
-  border-color: #C8A97E;
+  color: var(--time-accent);
+  border-color: var(--time-accent);
   background-color: transparent;
   transform: translateY(-3px);
 }
@@ -575,7 +580,7 @@ h6 {
   font-size: 0.75rem;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--time-text) 80%, #C8A97E);
+  color: color-mix(in srgb, var(--time-text) 80%, var(--time-accent));
   margin-bottom: 24px;
   display: flex;
   align-items: center;
@@ -587,7 +592,7 @@ h6 {
   content: "";
   height: 1px;
   width: 40px;
-  background-color: color-mix(in srgb, var(--time-text) 80%, #C8A97E);
+  background-color: color-mix(in srgb, var(--time-text) 80%, var(--time-accent));
   transition: background-color 4s ease;
 }
 
@@ -616,7 +621,7 @@ h6 {
   font-family: var(--font-sans);
   font-size: 1rem;
   letter-spacing: 0.1em;
-  color: color-mix(in srgb, var(--time-text) 80%, #C8A97E);
+  color: color-mix(in srgb, var(--time-text) 80%, var(--time-accent));
   border: 1px solid color-mix(in srgb, var(--time-text) 40%, transparent);
   border-radius: 30px;
   padding: 8px 20px;
@@ -659,16 +664,16 @@ h6 {
 }
 
 .luxury-link:hover {
-  color: #C8A97E;
+  color: var(--time-accent);
 }
 
 .luxury-link:hover .arrow {
   width: 40px;
-  background-color: #C8A97E;
+  background-color: var(--time-accent);
 }
 
 .luxury-link:hover .arrow::after {
-  border-color: #C8A97E;
+  border-color: var(--time-accent);
 }
 
 /* 3. Cerita (Review) Section */
@@ -762,11 +767,11 @@ h6 {
 
 .review-card:hover {
   transform: translateY(-3px);
-  border-color: #C8A97E;
+  border-color: var(--time-accent);
 }
 
 .card-stars {
-  color: #C8A97E;
+  color: var(--time-accent);
   font-size: 1.1rem;
   margin-bottom: 24px;
   position: relative;

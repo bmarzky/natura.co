@@ -516,7 +516,7 @@ document.addEventListener('DOMContentLoaded', () => {
         stars.forEach(s => {
           if (parseInt(s.getAttribute('data-value')) <= val) {
             s.textContent = '★';
-            s.style.color = '#C8A97E';
+            s.style.color = 'var(--time-accent)';
           } else {
             s.textContent = '☆';
             s.style.color = '';
@@ -530,7 +530,7 @@ document.addEventListener('DOMContentLoaded', () => {
         stars.forEach(s => {
           if (parseInt(s.getAttribute('data-value')) <= currentVal) {
             s.textContent = '★';
-            s.style.color = '#C8A97E';
+            s.style.color = 'var(--time-accent)';
             s.classList.add('active');
           } else {
             s.textContent = '☆';
@@ -548,7 +548,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (parseInt(s.getAttribute('data-value')) <= val) {
             s.classList.add('active');
             s.textContent = '★';
-            s.style.color = '#C8A97E';
+            s.style.color = 'var(--time-accent)';
           } else {
             s.classList.remove('active');
             s.textContent = '☆';
