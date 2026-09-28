@@ -278,6 +278,16 @@ document.addEventListener('DOMContentLoaded', () => {
     return getLikedReviews().includes(id);
   }
 
+  function escapeHTML(str) {
+    if (!str) return '';
+    return str.toString()
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   function appendReviewToGrid(review, index = 0, prepend = false) {
     if (!reviewGrid) return;
 
@@ -304,13 +314,16 @@ document.addEventListener('DOMContentLoaded', () => {
       dateStr = dateObj.toLocaleDateString('id-ID', options).replace(/\./g, ':');
     }
 
+    const safeText = escapeHTML(review.text);
+    const safeName = escapeHTML(review.name);
+
     newReviewWrapper.innerHTML = `
       <article class="review-card">
         <div class="card-stars">${starsHtml}</div>
-        <blockquote class="card-quote">"${review.text}"</blockquote>
+        <blockquote class="card-quote">"${safeText}"</blockquote>
         <div class="card-footer">
           <div class="card-author-info" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <span class="card-author">&mdash; ${review.name}</span>
+            <span class="card-author">&mdash; ${safeName}</span>
             <span class="card-date" style="font-size: 0.75rem; color: var(--sage-green); padding-top: 2px;">• ${dateStr}</span>
           </div>
           <button class="${likeClass}" data-id="${review.id}" data-count="${review.likes || 0}">
@@ -548,6 +561,16 @@ document.addEventListener('DOMContentLoaded', () => {
     reviewForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
+      // Rate limiting: max 1 review per 5 minutes per device
+      const lastReviewTime = localStorage.getItem('natura_last_review_time');
+      if (lastReviewTime) {
+        const timeSinceLast = Date.now() - parseInt(lastReviewTime);
+        if (timeSinceLast < 5 * 60 * 1000) {
+          showToast("Tunggu sebentar sebelum membagikan cerita lagi.");
+          return;
+        }
+      }
+
       const rating = parseInt(ratingInput.value);
       if (!rating || rating === 0) {
         showToast("Silakan berikan rating bintang terlebih dahulu.");
@@ -557,13 +580,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const name = document.getElementById('reviewName').value.trim();
       const text = document.getElementById('reviewText').value.trim();
 
-      if (!name) {
-        showToast("Silakan masukkan nama Anda terlebih dahulu.");
+      if (!name || name.length > 50) {
+        showToast("Nama tidak valid atau terlalu panjang.");
         return;
       }
 
-      if (!text) {
-        showToast("Silakan tulis cerita momen Anda terlebih dahulu.");
+      if (!text || text.length > 500) {
+        showToast("Cerita tidak valid atau terlalu panjang.");
         return;
       }
 
@@ -596,6 +619,9 @@ document.addEventListener('DOMContentLoaded', () => {
           appendReviewToGrid(mock, 0, true);
           setTimeout(initCarousel, 100);
         }
+
+        // Record successful submission time for rate limiting
+        localStorage.setItem('natura_last_review_time', Date.now().toString());
 
         modalFormContainer.style.display = 'none';
         modalSuccess.style.display = 'block';
