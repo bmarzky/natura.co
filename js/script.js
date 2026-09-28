@@ -324,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="card-footer">
           <div class="card-author-info" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
             <span class="card-author">&mdash; ${safeName}</span>
-            <span class="card-date" style="font-size: 0.75rem; color: var(--sage-green); padding-top: 2px;">• ${dateStr}</span>
+            <span class="card-date" style="font-size: 0.75rem; color: color-mix(in srgb, var(--time-text) 60%, transparent); padding-top: 2px; transition: color 4s ease;">• ${dateStr}</span>
           </div>
           <button class="${likeClass}" data-id="${review.id}" data-count="${review.likes || 0}">
             <span class="like-icon">${likeIcon}</span>

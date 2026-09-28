@@ -701,9 +701,10 @@ h6 {
 
 .review-hero .hero-text p {
   font-size: 0.95rem;
-  color: var(--sage-green);
+  color: color-mix(in srgb, var(--time-text) 80%, transparent);
   font-family: var(--font-sans);
   max-width: 480px;
+  transition: color 4s ease;
 }
 
 .review-stats {
@@ -724,18 +725,19 @@ h6 {
 }
 
 .stars {
-  /* 🪵 Natural Brown */
-  color: var(--natural-brown);
+  color: var(--time-accent);
   font-size: 1.25rem;
   letter-spacing: 2px;
   margin: 16px 0 8px 0;
+  transition: color 4s ease;
 }
 
 .review-count {
   font-size: 0.85rem;
-  color: var(--sage-green);
+  color: color-mix(in srgb, var(--time-text) 70%, transparent);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  transition: color 4s ease;
 }
 
 /* Grid / Slider */
