@@ -806,10 +806,8 @@ h6 {
 }
 
 .review-card:hover {
-  transform: translateY(-8px);
-  background-color: color-mix(in srgb, var(--time-text) 2%, transparent);
-  box-shadow: 0 20px 40px color-mix(in srgb, var(--time-text) 5%, transparent);
-  border-color: color-mix(in srgb, var(--time-text) 30%, transparent);
+  transform: translateY(-3px);
+  border-color: #C8A97E;
 }
 
 .card-stars {
