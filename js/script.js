@@ -240,16 +240,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (data.length === 0) {
           reviewGrid.innerHTML = `
-            <div class="empty-reviews fade-in-up in-view" style="flex: 0 0 100%; min-width: 100%; text-align: center; padding: 60px 20px; border: 1px dashed color-mix(in srgb, var(--sage-green) 40%, transparent); border-radius: 12px; margin: 20px 0;">
-              <h3 style="color: var(--forest-green); margin-bottom: 8px; font-family: var(--font-serif);">Belum Ada Cerita</h3>
-              <p style="color: var(--sage-green); font-size: 0.95rem;">Jadilah yang pertama membagikan kenangan manis Anda bersama natura.co!</p>
+            <div class="empty-reviews fade-in-up in-view" style="flex: 0 0 100%; min-width: 100%; text-align: center; padding: 60px 20px; border: 1px dashed color-mix(in srgb, var(--time-text) 30%, transparent); border-radius: 12px; margin: 20px 0;">
+              <h3 style="color: var(--time-text); margin-bottom: 8px; font-family: var(--font-serif); transition: color 4s ease;">Belum Ada Cerita</h3>
+              <p style="color: color-mix(in srgb, var(--time-text) 70%, transparent); font-size: 0.95rem; transition: color 4s ease;">Jadilah yang pertama membagikan kenangan manis Anda bersama natura.co</p>
             </div>
           `;
         } else {
           data.forEach((review, index) => {
             appendReviewToGrid(review, index);
           });
-          
+
           // Initialize automatic slider
           setTimeout(initCarousel, 100);
         }
@@ -366,7 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (slideInterval) clearInterval(slideInterval);
     const track = document.querySelector('.review-grid');
     if (!track) return;
-    
+
     track.style.transition = 'none';
     track.style.transform = 'translateX(0)';
 
@@ -375,22 +375,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     slideInterval = setInterval(() => {
       if (isTransitioning) return;
-      
+
       const isMobile = window.innerWidth <= 768;
       const cardsPerView = isMobile ? 1 : 2;
-      
+
       if (totalReviews <= cardsPerView) return; // No need to slide
 
       isTransitioning = true;
       const card = track.children[0];
       const cardWidth = card.offsetWidth;
-      const gap = isMobile ? 20 : 40; 
+      const gap = isMobile ? 20 : 40;
       const moveDistance = (cardWidth + gap) * cardsPerView;
-      
+
       // Animate slide
       track.style.transition = 'transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
       track.style.transform = `translateX(-${moveDistance}px)`;
-      
+
       // Wait for animation to finish, then shift DOM
       setTimeout(() => {
         for (let i = 0; i < cardsPerView; i++) {
@@ -398,11 +398,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         track.style.transition = 'none';
         track.style.transform = 'translateX(0)';
-        
+
         setTimeout(() => {
           isTransitioning = false;
         }, 50);
-      }, 800); 
+      }, 800);
     }, 5000);
   }
 
