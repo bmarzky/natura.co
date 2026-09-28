@@ -350,51 +350,6 @@ h6 {
   transform: translateY(-3px);
 }
 
-/* Scroll Indicator */
-.scroll-indicator {
-  position: absolute;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  color: var(--sage-green);
-  z-index: 2;
-}
-
-.scroll-text {
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  font-family: var(--font-sans);
-}
-
-.scroll-arrow {
-  font-size: 1.2rem;
-  animation: bounce 2s infinite;
-}
-
-@keyframes bounce {
-
-  0%,
-  20%,
-  50%,
-  80%,
-  100% {
-    transform: translateY(0);
-  }
-
-  40% {
-    transform: translateY(8px);
-  }
-
-  60% {
-    transform: translateY(4px);
-  }
-}
-
 /* Scroll Animations */
 .fade-in {
   opacity: 0;
@@ -895,15 +850,6 @@ h6 {
 
 /* Responsive */
 @media (max-width: 900px) {
-  .menu-item-card {
-    flex-direction: column;
-  }
-
-  .menu-image-placeholder {
-    width: 100%;
-    min-height: 250px;
-  }
-
   .review-hero {
     flex-direction: column;
     align-items: flex-start;
@@ -1150,6 +1096,7 @@ h6 {
   border-color: var(--deep-charcoal);
   transform: scale(1.1);
 }
+
 
 .modal-success {
   padding: 40px 0;
