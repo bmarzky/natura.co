@@ -127,14 +127,31 @@ h6 {
   text-decoration: none;
   color: color-mix(in srgb, var(--time-text) 70%, transparent);
   font-size: 0.95rem;
-  transition: color 0.3s ease, border-color 0.3s ease;
+  transition: color 0.3s ease;
+  position: relative;
+  padding-bottom: 4px;
+}
+
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 1px;
+  background-color: var(--time-text);
+  transition: width 0.3s ease, transform 0.3s ease;
+  transform: translateX(-50%);
 }
 
 .nav-links a:hover,
 .nav-links a.active {
   color: var(--time-text);
-  border-bottom: 1px solid var(--time-text);
-  padding-bottom: 4px;
+}
+
+.nav-links a:hover::after,
+.nav-links a.active::after {
+  width: 100%;
 }
 
 /* Store Status Indicator */
@@ -217,12 +234,14 @@ h6 {
   font-family: var(--font-sans);
   font-size: 0.9rem;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
   display: inline-block;
 }
 
 .btn-primary:hover {
   background-color: #8c6a46;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px color-mix(in srgb, var(--natural-brown) 40%, transparent);
 }
 
 .btn-secondary {
@@ -234,7 +253,7 @@ h6 {
   font-family: var(--font-sans);
   font-size: 1rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
   text-decoration: none;
   display: inline-block;
 }
@@ -242,6 +261,8 @@ h6 {
 .btn-secondary:hover {
   background-color: var(--time-text);
   color: var(--time-bg);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px color-mix(in srgb, var(--time-text) 15%, transparent);
 }
 
 /* 1. Beranda / Hero Section */
@@ -327,6 +348,8 @@ h6 {
 .hero-home .btn-secondary:hover {
   background-color: var(--time-text);
   color: var(--time-bg);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px color-mix(in srgb, var(--time-text) 15%, transparent);
 }
 
 /* Scroll Indicator */
@@ -507,7 +530,13 @@ h6 {
   padding: 30px 8vw;
   border: 1px solid color-mix(in srgb, var(--time-text) 20%, transparent);
   border-radius: 40px;
-  transition: border-color 4s ease;
+  transition: border-color 4s ease, transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.luxury-menu-item:hover {
+  transform: translateX(-50%) translateY(-5px);
+  box-shadow: 0 20px 40px color-mix(in srgb, var(--time-text) 5%, transparent);
+  border-color: color-mix(in srgb, var(--time-text) 40%, transparent);
 }
 
 .luxury-image {
@@ -517,7 +546,12 @@ h6 {
   border-radius: 500px 500px 0 0;
   border: 1px solid color-mix(in srgb, var(--time-text) 30%, transparent);
   padding: 16px;
-  transition: border-color 4s ease;
+  transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.luxury-menu-item:hover .luxury-image {
+  transform: translateY(-8px);
+  border-color: color-mix(in srgb, var(--time-text) 60%, transparent);
 }
 
 .luxury-image::before {
