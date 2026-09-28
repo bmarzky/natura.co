@@ -1,7 +1,7 @@
 # natura.co
 > "Dari rasa, lahir sebuah cerita."
 
-natura.co adalah halaman landas (landing page) bergaya editorial premium untuk sebuah jenama (brand) kue klasik. Didesain dengan fokus pada pengalaman emosional pengguna, antarmuka situs ini memadukan estetika minimalis, animasi yang mulus, serta lingkungan yang bereaksi cerdas terhadap waktu.
+natura.co adalah halaman landas (landing page) bergaya editorial premium untuk sebuah brand kue klasik. Didesain dengan fokus pada pengalaman emosional pengguna, antarmuka situs ini memadukan estetika minimalis, animasi yang mulus, serta lingkungan yang bereaksi cerdas terhadap waktu.
 
 ## Fitur Utama
 
