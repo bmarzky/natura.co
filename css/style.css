@@ -340,7 +340,7 @@ h6 {
 .hero-home .btn-secondary {
   color: var(--time-text);
   border-color: var(--time-text);
-  transition: color 4s ease, border-color 4s ease, background-color 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .hero-home .btn-secondary:hover {
