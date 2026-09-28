@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --- SCROLL REVEAL ANIMATIONS ---
-  const revealElements = document.querySelectorAll('.fade-in, .fade-in-up');
+  const revealElements = document.querySelectorAll('.fade-in, .fade-in-up, .fade-in-left, .fade-in-right, .scale-up');
 
   const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
