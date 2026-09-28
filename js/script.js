@@ -580,8 +580,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const name = document.getElementById('reviewName').value.trim();
       const text = document.getElementById('reviewText').value.trim();
 
-      if (!name || name.length < 2 || name.length > 50) {
-        showToast("Nama harus terdiri dari minimal 2 karakter.");
+      if (!name || name.length > 2) {
+        showToast("Nama maksimal 2 karakter.");
         return;
       }
 
