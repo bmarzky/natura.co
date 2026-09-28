@@ -239,9 +239,8 @@ h6 {
 }
 
 .btn-primary:hover {
-  background-color: #8c6a46;
+  background-color: #C8A97E;
   transform: translateY(-3px);
-  box-shadow: 0 8px 16px color-mix(in srgb, var(--natural-brown) 40%, transparent);
 }
 
 .btn-secondary {
@@ -259,10 +258,9 @@ h6 {
 }
 
 .btn-secondary:hover {
-  background-color: var(--time-text);
-  color: var(--time-bg);
+  color: #C8A97E;
+  border-color: #C8A97E;
   transform: translateY(-3px);
-  box-shadow: 0 10px 20px color-mix(in srgb, var(--time-text) 15%, transparent);
 }
 
 /* 1. Beranda / Hero Section */
@@ -346,10 +344,10 @@ h6 {
 }
 
 .hero-home .btn-secondary:hover {
-  background-color: var(--time-text);
-  color: var(--time-bg);
+  color: #C8A97E;
+  border-color: #C8A97E;
+  background-color: transparent;
   transform: translateY(-3px);
-  box-shadow: 0 10px 20px color-mix(in srgb, var(--time-text) 15%, transparent);
 }
 
 /* Scroll Indicator */
