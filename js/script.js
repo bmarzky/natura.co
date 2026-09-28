@@ -467,7 +467,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Reset Word Counter
       if (wordCounter) {
         wordCounter.textContent = `0/${MAX_WORDS}`;
-        wordCounter.style.color = 'var(--sage-green)';
+        wordCounter.style.color = 'var(--modal-muted)';
       }
     });
 
@@ -490,7 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (wordCount === MAX_WORDS) {
           wordCounter.style.color = '#d84b4b'; // red warning color
         } else {
-          wordCounter.style.color = 'var(--sage-green)';
+          wordCounter.style.color = 'var(--modal-muted)';
         }
       });
     }
