@@ -965,17 +965,33 @@ h6 {
 }
 
 .modal-content {
-  background-color: var(--warm-cream);
-  color: var(--forest-green);
+  /* Modal color system — defaults (night / fallback) */
+  --modal-bg: var(--warm-cream);
+  --modal-text: var(--forest-green);
+  --modal-muted: var(--sage-green);
+  --modal-border: var(--sage-green);
+
+  background-color: var(--modal-bg);
+  color: var(--modal-text);
   padding: 48px;
   border-radius: 24px;
   width: 90%;
   max-width: 500px;
   position: relative;
   transform: translateY(30px);
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.6s ease, color 0.6s ease;
   box-shadow: 0 24px 48px rgba(0,0,0,0.4);
   text-align: center;
+}
+
+/* Dark modal for light page themes */
+body.time-morning .modal-content,
+body.time-day .modal-content,
+body.time-golden-hour .modal-content {
+  --modal-bg: #183C2C;
+  --modal-text: #F3EBDD;
+  --modal-muted: #7C9278;
+  --modal-border: rgba(243, 235, 221, 0.25);
 }
 
 .modal-overlay.active .modal-content {
@@ -990,10 +1006,10 @@ h6 {
   border: none;
   font-size: 2rem;
   line-height: 1;
-  color: var(--deep-charcoal);
+  color: var(--modal-text);
   cursor: pointer;
   opacity: 0.5;
-  transition: opacity 0.3s ease, color 4s ease;
+  transition: opacity 0.3s ease;
 }
 
 .modal-close:hover {
@@ -1003,13 +1019,13 @@ h6 {
 .modal-title {
   font-family: var(--font-serif);
   font-size: 2.5rem;
-  color: var(--forest-green);
+  color: var(--modal-text);
   margin-bottom: 12px;
 }
 
 .modal-subtitle {
   font-family: var(--font-sans);
-  color: var(--sage-green);
+  color: var(--modal-muted);
   margin-bottom: 32px;
 }
 
@@ -1020,7 +1036,7 @@ h6 {
 
 .rating-input {
   font-size: 2rem;
-  color: var(--sage-green);
+  color: var(--modal-muted);
   cursor: pointer;
   display: flex;
   gap: 8px;
@@ -1037,24 +1053,28 @@ h6 {
 }
 
 .rating-input span.active {
-  color: var(--natural-brown);
+  color: var(--time-accent);
 }
 
 .form-group input, .form-group textarea {
   width: 100%;
   padding: 16px;
-  border: 1px solid var(--sage-green);
+  border: 1px solid var(--modal-border);
   border-radius: 12px;
   background-color: transparent;
   font-family: var(--font-sans);
-  color: var(--deep-charcoal);
+  color: var(--modal-text);
   font-size: 1rem;
   transition: border-color 0.3s ease;
 }
 
+.form-group input::placeholder, .form-group textarea::placeholder {
+  color: var(--modal-muted);
+}
+
 .form-group input:focus, .form-group textarea:focus {
   outline: none;
-  border-color: var(--forest-green);
+  border-color: var(--modal-text);
 }
 
 .word-counter {
@@ -1062,11 +1082,11 @@ h6 {
   bottom: 14px;
   right: 16px;
   font-size: 0.75rem;
-  color: var(--sage-green);
+  color: var(--modal-muted);
   font-family: var(--font-sans);
   transition: color 0.3s ease;
   pointer-events: none;
-  background-color: var(--warm-cream); /* Make it readable if text goes behind */
+  background-color: var(--modal-bg);
   padding: 2px 6px;
   border-radius: 4px;
 }
@@ -1077,13 +1097,13 @@ h6 {
 
 .modal-content .btn-secondary {
   background-color: transparent;
-  color: var(--forest-green);
-  border: 1px solid var(--forest-green);
+  color: var(--modal-text);
+  border: 1px solid var(--modal-text);
 }
 
 .modal-content .btn-secondary:hover {
-  background-color: var(--forest-green);
-  color: var(--warm-cream);
+  background-color: var(--modal-text);
+  color: var(--modal-bg);
 }
 
 .instagram-link {
@@ -1093,14 +1113,14 @@ h6 {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  border: 1px solid color-mix(in srgb, var(--deep-charcoal) 20%, transparent);
-  color: var(--deep-charcoal);
+  border: 1px solid color-mix(in srgb, var(--modal-text) 20%, transparent);
+  color: var(--modal-text);
   transition: all 0.3s ease;
   text-decoration: none;
 }
 
 .instagram-link:hover {
-  border-color: var(--deep-charcoal);
+  border-color: var(--modal-text);
   transform: scale(1.1);
 }
 
@@ -1118,13 +1138,13 @@ h6 {
 .modal-success h4 {
   font-family: var(--font-serif);
   font-size: 2rem;
-  color: var(--forest-green);
+  color: var(--modal-text);
   margin-bottom: 12px;
 }
 
 .modal-success p {
   font-family: var(--font-sans);
-  color: var(--sage-green);
+  color: var(--modal-muted);
 }
 
 /* Custom Toast Notification */
