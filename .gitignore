@@ -1,0 +1,8 @@
+# Konfigurasi rahasia
+js/config.js
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
