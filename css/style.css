@@ -687,7 +687,6 @@ h6 {
   width: 100%;
   height: 450px;
   border-radius: 14px;
-  border: 1.5px dashed color-mix(in srgb, var(--time-text) 30%, transparent);
   z-index: 1;
 }
 
@@ -700,6 +699,19 @@ h6 {
   border-radius: 20px;
   padding: 10px;
   transition: border-color 4s ease;
+}
+
+.map-container::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 1.5px dashed color-mix(in srgb, var(--time-text) 40%, transparent);
+  border-radius: 14px;
+  pointer-events: none;
+  z-index: 999;
 }
 
 .map-overlay-info {
