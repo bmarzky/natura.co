@@ -682,6 +682,73 @@ h6 {
   border-color: var(--time-accent);
 }
 
+/* 2.5 Alamat Section */
+#map {
+  width: 100%;
+  height: 450px;
+  border-radius: 20px;
+  z-index: 1;
+}
+
+body.time-morning #map { filter: sepia(0.3) brightness(0.9) contrast(1.1); }
+body.time-day #map { filter: sepia(0.1) brightness(0.95); }
+body.time-golden-hour #map { filter: sepia(0.5) hue-rotate(-15deg) brightness(0.9); }
+body.time-night #map { filter: invert(0.9) hue-rotate(160deg) brightness(0.8) contrast(1.2); }
+
+.map-container {
+  position: relative;
+  width: 90vw;
+  max-width: 1100px;
+  margin: 0 auto;
+  border: 1px solid color-mix(in srgb, var(--time-text) 20%, transparent);
+  border-radius: 20px;
+  padding: 10px;
+  transition: border-color 4s ease;
+}
+
+.map-overlay-info {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  background-color: color-mix(in srgb, var(--time-bg) 95%, transparent);
+  backdrop-filter: blur(8px);
+  color: var(--time-text);
+  padding: 16px 24px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--time-text) 15%, transparent);
+  z-index: 2;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  transition: all 4s ease;
+}
+
+.map-overlay-info h4 {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 6px;
+  color: var(--time-accent);
+}
+
+.map-overlay-info p {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  color: color-mix(in srgb, var(--time-text) 80%, transparent);
+}
+
+@media (max-width: 768px) {
+  #map {
+    height: 300px;
+  }
+  .map-overlay-info {
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    text-align: center;
+  }
+}
+
 /* 3. Cerita (Review) Section */
 .review-hero {
   display: flex;

@@ -656,4 +656,39 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // --- MAP LOGIC ---
+  const mapEl = document.getElementById('map');
+  if (mapEl && window.L) {
+    const storeLat = 5.2036;
+    const storeLng = 96.7029;
+    
+    const map = L.map('map', {
+      zoomControl: true,
+      scrollWheelZoom: true
+    }).setView([storeLat, storeLng], 13);
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    const storeIcon = L.divIcon({
+      className: 'custom-store-marker',
+      html: `<div style="background-color: var(--time-accent); width: 20px; height: 20px; border-radius: 50%; border: 3px solid var(--time-bg); box-shadow: 0 0 10px rgba(0,0,0,0.5);"></div>`,
+      iconSize: [26, 26],
+      iconAnchor: [13, 13]
+    });
+
+    L.marker([storeLat, storeLng], {icon: storeIcon}).addTo(map)
+      .bindPopup('<b style="font-family: var(--font-serif); font-size: 1.1rem; color: #183C2C;">natura house</b><br><span style="font-family: var(--font-sans); font-size: 0.8rem;">Dusun Teratai</span>');
+
+    // Delivery Area Polygon (3km Radius)
+    L.circle([storeLat, storeLng], {
+      color: '#C8A97E',
+      fillColor: '#C8A97E',
+      fillOpacity: 0.25,
+      weight: 2,
+      radius: 3000
+    }).addTo(map);
+  }
 });

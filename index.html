@@ -12,6 +12,8 @@
     href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/config.js"></script>
   <script src="js/script.js" defer></script>
@@ -27,6 +29,7 @@
         <ul class="nav-links">
           <li><a href="javascript:void(0)" data-scroll="beranda" class="active">Beranda</a></li>
           <li><a href="javascript:void(0)" data-scroll="menu">Tentang Rasa</a></li>
+          <li><a href="javascript:void(0)" data-scroll="alamat">Alamat</a></li>
           <li><a href="javascript:void(0)" data-scroll="cerita">Cerita Kita</a></li>
         </ul>
         <div class="store-status" id="storeStatus">
@@ -88,7 +91,22 @@
         </div>
       </section>
 
-      <!-- 3. CERITA (REVIEWS) SECTION -->
+      <!-- 3. ALAMAT SECTION -->
+      <section id="alamat" class="page-section location-section">
+        <div class="section-header fade-in-up">
+          <h2 class="section-title">Temukan Kami</h2>
+          <p class="section-subtitle" style="margin-bottom: 40px;">Dusun Teratai, Geulanggang Baro, Kota Juang, Bireuen, Aceh</p>
+        </div>
+        <div class="map-container fade-in-up delay-1">
+          <div id="map"></div>
+          <div class="map-overlay-info">
+            <h4>Batas Pengiriman</h4>
+            <p>Area dalam radius 3km</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. CERITA (REVIEWS) SECTION -->
       <section id="cerita" class="page-section review-section">
         <div class="review-hero">
           <div class="hero-text fade-in-left">
