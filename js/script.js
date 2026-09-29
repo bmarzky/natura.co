@@ -255,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
           reviewGrid.innerHTML = `
             <div class="empty-reviews fade-in-up in-view" style="flex: 0 0 100%; min-width: 100%; text-align: center; padding: 60px 20px; border: 1px dashed color-mix(in srgb, var(--time-text) 30%, transparent); border-radius: 12px; margin: 20px 0;">
               <h3 style="color: var(--time-text); margin-bottom: 8px; font-family: var(--font-serif); transition: color 4s ease;">Belum Ada Cerita</h3>
-              <p style="color: color-mix(in srgb, var(--time-text) 70%, transparent); font-size: 0.95rem; transition: color 4s ease;">Jadilah yang pertama membagikan kenangan manis Anda bersama natura.co</p>
+              <p style="color: color-mix(in srgb, var(--time-text) 70%, transparent); font-size: 0.95rem; transition: color 4s ease;">Jadilah yang pertama membagikan kenangan manis Anda bersama natura house</p>
             </div>
           `;
         } else {
