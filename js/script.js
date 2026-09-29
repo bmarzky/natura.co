@@ -660,8 +660,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- MAP LOGIC ---
   const mapEl = document.getElementById('map');
   if (mapEl && window.L) {
-    const storeLat = 5.2036;
-    const storeLng = 96.7029;
+    const storeLat = 5.2043;
+    const storeLng = 96.7208;
     
     const map = L.map('map', {
       zoomControl: true,
