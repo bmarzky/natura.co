@@ -1285,13 +1285,14 @@ body.time-golden-hour .modal-content {
   
   .nav-links {
     width: 100%;
-    justify-content: center;
+    justify-content: space-between;
     order: 3;
-    gap: 20px;
+    gap: 8px;
   }
   
   .nav-links a {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
   }
   
   .page-section {
