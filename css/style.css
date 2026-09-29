@@ -20,6 +20,7 @@ html {
   /* Sembunyikan scrollbar untuk Firefox, IE, dan Edge */
   scrollbar-width: none;
   -ms-overflow-style: none;
+  overscroll-behavior: none;
 }
 
 /* Sembunyikan scrollbar untuk Chrome, Safari, dan Opera */
