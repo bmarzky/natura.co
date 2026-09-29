@@ -704,14 +704,14 @@ h6 {
 .map-container::before {
   content: "";
   position: absolute;
-  top: 10px;
-  left: 10px;
-  right: 10px;
-  bottom: 10px;
-  border: 1.5px dashed color-mix(in srgb, var(--time-text) 40%, transparent);
-  border-radius: 14px;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  border: 1px dashed color-mix(in srgb, var(--time-text) 50%, transparent);
+  border-radius: 16px;
   pointer-events: none;
-  z-index: 999;
+  z-index: 2;
 }
 
 .map-overlay-info {
