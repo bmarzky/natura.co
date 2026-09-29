@@ -702,5 +702,72 @@ document.addEventListener('DOMContentLoaded', () => {
       // Fit map is disabled so it focuses closely on the store
       // map.fitBounds(boundaryLayer.getBounds(), { padding: [40, 40] });
     }
+
+    // Interactive Distance Feature
+    const btnCheckDistance = document.getElementById('btnCheckDistance');
+    let userMarker = null;
+    let distanceLine = null;
+
+    if (btnCheckDistance) {
+      btnCheckDistance.addEventListener('click', () => {
+        if (!navigator.geolocation) {
+          alert('Maaf, browser Anda tidak mendukung fitur lokasi.');
+          return;
+        }
+
+        btnCheckDistance.textContent = 'Mencari lokasi...';
+        btnCheckDistance.disabled = true;
+
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+            const userLatLng = [userLat, userLng];
+            const storeLatLng = [storeLat, storeLng];
+
+            // Calculate distance in meters
+            const distanceMeters = map.distance(storeLatLng, userLatLng);
+            const distanceKm = (distanceMeters / 1000).toFixed(1);
+
+            // Clean up previous markers if any
+            if (userMarker) map.removeLayer(userMarker);
+            if (distanceLine) map.removeLayer(distanceLine);
+
+            // User Icon
+            const userIcon = L.divIcon({
+              className: 'custom-user-marker',
+              html: `<div style="background-color: #2c7be5; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.5);"></div>`,
+              iconSize: [22, 22],
+              iconAnchor: [11, 11]
+            });
+
+            userMarker = L.marker(userLatLng, {icon: userIcon}).addTo(map)
+              .bindPopup(`<b style="font-family: var(--font-sans); font-size: 0.9rem;">Lokasi Anda</b><br>Jarak ke toko: <b>${distanceKm} km</b>`).openPopup();
+
+            // Draw line
+            distanceLine = L.polyline([storeLatLng, userLatLng], {
+              color: '#2c7be5',
+              weight: 3,
+              dashArray: '5, 10',
+              opacity: 0.8
+            }).addTo(map);
+
+            // Fit bounds to show both store and user
+            const bounds = L.latLngBounds([storeLatLng, userLatLng]);
+            map.fitBounds(bounds, { padding: [50, 50] });
+
+            btnCheckDistance.textContent = 'Cek Ulang Jarak';
+            btnCheckDistance.disabled = false;
+          },
+          (error) => {
+            console.error(error);
+            alert('Gagal mendapatkan lokasi. Pastikan Anda mengizinkan akses lokasi.');
+            btnCheckDistance.textContent = 'Cek Jarak Saya';
+            btnCheckDistance.disabled = false;
+          },
+          { enableHighAccuracy: true }
+        );
+      });
+    }
   }
 });
