@@ -593,8 +593,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const name = document.getElementById('reviewName').value.trim();
       const text = document.getElementById('reviewText').value.trim();
 
-      if (!name || name.length > 3) {
-        showToast("Nama maksimal 3 karakter.");
+      if (!name || name.length > 25) {
+        showToast("Nama maksimal 25 karakter.");
         return;
       }
 
