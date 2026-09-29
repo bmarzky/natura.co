@@ -1311,10 +1311,22 @@ body.time-golden-hour .modal-content {
     margin-bottom: 24px;
   }
   
+  .site-footer {
+    padding: 24px 20px;
+  }
+  
   .footer-inline {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+  }
+  
+  .footer-address-mini, 
+  .footer-brand-mini, 
+  .footer-copyright {
+    width: 100%;
     text-align: center;
-    gap: 12px;
   }
   
   .footer-separator {
