@@ -668,8 +668,8 @@ document.addEventListener('DOMContentLoaded', () => {
       scrollWheelZoom: true
     }).setView([storeLat, storeLng], 13);
 
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-      attribution: 'Tiles &copy; Esri'
+    L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+      attribution: '&copy; Google Maps'
     }).addTo(map);
 
     const storeIcon = L.divIcon({

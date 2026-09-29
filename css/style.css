@@ -690,10 +690,7 @@ h6 {
   z-index: 1;
 }
 
-body.time-morning #map { filter: sepia(0.3) brightness(0.9) contrast(1.1); }
-body.time-day #map { filter: sepia(0.1) brightness(0.95); }
-body.time-golden-hour #map { filter: sepia(0.5) hue-rotate(-15deg) brightness(0.9); }
-body.time-night #map { filter: invert(0.9) hue-rotate(160deg) brightness(0.8) contrast(1.2); }
+
 
 .map-container {
   position: relative;
