@@ -725,39 +725,79 @@ document.addEventListener('DOMContentLoaded', () => {
             const userLatLng = [userLat, userLng];
             const storeLatLng = [storeLat, storeLng];
 
-            // Calculate distance in meters
-            const distanceMeters = map.distance(storeLatLng, userLatLng);
-            const distanceKm = (distanceMeters / 1000).toFixed(1);
+            // Call OSRM API for real road routing
+            const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${userLng},${userLat};${storeLng},${storeLat}?overview=full&geometries=geojson`;
+            
+            fetch(osrmUrl)
+              .then(res => res.json())
+              .then(data => {
+                if(data.code !== 'Ok') throw new Error('Route not found');
+                
+                const route = data.routes[0];
+                const distanceMeters = route.distance;
+                const distanceKm = (distanceMeters / 1000).toFixed(1);
 
-            // Clean up previous markers if any
-            if (userMarker) map.removeLayer(userMarker);
-            if (distanceLine) map.removeLayer(distanceLine);
+                // Clean up previous markers if any
+                if (userMarker) map.removeLayer(userMarker);
+                if (distanceLine) map.removeLayer(distanceLine);
 
-            // User Icon
-            const userIcon = L.divIcon({
-              className: 'custom-user-marker',
-              html: `<div style="background-color: #2c7be5; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.5);"></div>`,
-              iconSize: [22, 22],
-              iconAnchor: [11, 11]
-            });
+                // User Icon
+                const userIcon = L.divIcon({
+                  className: 'custom-user-marker',
+                  html: `<div style="background-color: #2c7be5; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.5);"></div>`,
+                  iconSize: [22, 22],
+                  iconAnchor: [11, 11]
+                });
 
-            userMarker = L.marker(userLatLng, {icon: userIcon}).addTo(map)
-              .bindPopup(`<b style="font-family: var(--font-sans); font-size: 0.9rem;">Lokasi Anda</b><br>Jarak ke toko: <b>${distanceKm} km</b>`).openPopup();
+                userMarker = L.marker(userLatLng, {icon: userIcon}).addTo(map)
+                  .bindPopup(`<b style="font-family: var(--font-sans); font-size: 0.9rem;">Lokasi Anda</b><br>Jarak tempuh ke toko: <b>${distanceKm} km</b>`).openPopup();
 
-            // Draw line
-            distanceLine = L.polyline([storeLatLng, userLatLng], {
-              color: '#2c7be5',
-              weight: 3,
-              dashArray: '5, 10',
-              opacity: 0.8
-            }).addTo(map);
+                // Draw line along roads
+                distanceLine = L.geoJSON(route.geometry, {
+                  style: {
+                    color: '#2c7be5',
+                    weight: 4,
+                    dashArray: '5, 10',
+                    opacity: 0.8
+                  }
+                }).addTo(map);
 
-            // Fit bounds to show both store and user
-            const bounds = L.latLngBounds([storeLatLng, userLatLng]);
-            map.fitBounds(bounds, { padding: [50, 50] });
+                // Fit bounds to show the whole route
+                map.fitBounds(distanceLine.getBounds(), { padding: [50, 50] });
 
-            btnCheckDistance.textContent = 'Cek Ulang Jarak';
-            btnCheckDistance.disabled = false;
+                btnCheckDistance.textContent = 'Cek Ulang Jarak';
+                btnCheckDistance.disabled = false;
+              })
+              .catch(err => {
+                console.error("OSRM Error:", err);
+                
+                // Fallback to straight line if API fails
+                const distanceMeters = map.distance(storeLatLng, userLatLng);
+                const distanceKm = (distanceMeters / 1000).toFixed(1);
+
+                if (userMarker) map.removeLayer(userMarker);
+                if (distanceLine) map.removeLayer(distanceLine);
+
+                const userIcon = L.divIcon({
+                  className: 'custom-user-marker',
+                  html: `<div style="background-color: #2c7be5; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.5);"></div>`,
+                  iconSize: [22, 22],
+                  iconAnchor: [11, 11]
+                });
+
+                userMarker = L.marker(userLatLng, {icon: userIcon}).addTo(map)
+                  .bindPopup(`<b style="font-family: var(--font-sans); font-size: 0.9rem;">Lokasi Anda</b><br>Jarak lurus ke toko: <b>${distanceKm} km</b>`).openPopup();
+
+                distanceLine = L.polyline([storeLatLng, userLatLng], {
+                  color: '#2c7be5', weight: 3, dashArray: '5, 10', opacity: 0.8
+                }).addTo(map);
+
+                const bounds = L.latLngBounds([storeLatLng, userLatLng]);
+                map.fitBounds(bounds, { padding: [50, 50] });
+
+                btnCheckDistance.textContent = 'Cek Ulang Jarak';
+                btnCheckDistance.disabled = false;
+              });
           },
           (error) => {
             console.error(error);
