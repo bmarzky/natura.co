@@ -1316,18 +1316,36 @@ body.time-golden-hour .modal-content {
   }
   
   .footer-inline {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 16px;
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    grid-template-areas: 
+      "brand ig wa"
+      "address address address"
+      "copyright copyright copyright";
+    row-gap: 12px;
+    column-gap: 16px;
+    align-items: center;
   }
   
-  .footer-address-mini, 
-  .footer-brand-mini, 
-  .footer-copyright {
-    width: 100%;
-    text-align: center;
+  .footer-brand-mini {
+    grid-area: brand;
+    text-align: left;
   }
+  
+  .footer-address-mini {
+    grid-area: address;
+    text-align: left;
+    line-height: 1.4;
+  }
+  
+  .footer-copyright {
+    grid-area: copyright;
+    text-align: left;
+    font-size: 0.75rem;
+  }
+  
+  .footer-link-mini[aria-label="Instagram"] { grid-area: ig; }
+  .footer-link-mini[aria-label="WhatsApp"] { grid-area: wa; }
   
   .footer-separator {
     display: none;
