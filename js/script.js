@@ -13,7 +13,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const targetId = link.getAttribute('data-scroll');
       const targetEl = document.getElementById(targetId);
       if (targetEl) {
-        targetEl.scrollIntoView({ behavior: 'smooth' });
+        const header = document.querySelector('.site-header');
+        const headerOffset = header ? header.offsetHeight : 0;
+        const elementPosition = targetEl.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
       }
     });
   });
