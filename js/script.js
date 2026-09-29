@@ -682,13 +682,20 @@ document.addEventListener('DOMContentLoaded', () => {
     L.marker([storeLat, storeLng], {icon: storeIcon}).addTo(map)
       .bindPopup('<b style="font-family: var(--font-serif); font-size: 1.1rem; color: #183C2C;">natura house</b><br><span style="font-family: var(--font-sans); font-size: 0.8rem;">Dusun Teratai</span>');
 
-    // Delivery Area Polygon (3km Radius)
-    L.circle([storeLat, storeLng], {
-      color: '#C8A97E',
-      fillColor: '#C8A97E',
-      fillOpacity: 0.25,
-      weight: 2,
-      radius: 3000
-    }).addTo(map);
+    // Delivery Area Polygon (Kota Juang Boundary)
+    if (typeof kotaJuangBoundary !== 'undefined') {
+      const boundaryLayer = L.geoJSON(kotaJuangBoundary, {
+        style: {
+          color: '#C8A97E', // gold line
+          weight: 3,
+          fillColor: '#C8A97E',
+          fillOpacity: 0.05,
+          dashArray: '4, 8' // dashed elegant line
+        }
+      }).addTo(map);
+
+      // Fit map to show the whole area elegantly
+      map.fitBounds(boundaryLayer.getBounds(), { padding: [40, 40] });
+    }
   }
 });
