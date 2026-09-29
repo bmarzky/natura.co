@@ -900,8 +900,10 @@ h6 {
 
 /* Footer Segaris */
 .site-footer {
-  background-color: var(--warm-cream);
+  background-color: color-mix(in srgb, var(--time-bg) 85%, black);
+  border-top: 1px solid color-mix(in srgb, var(--time-text) 15%, transparent);
   padding: 24px 40px;
+  transition: background-color 4s ease, border-color 4s ease;
 }
 
 .footer-inline {
@@ -913,25 +915,28 @@ h6 {
   flex-wrap: wrap;
   gap: 16px;
   font-size: 0.85rem;
-  color: var(--deep-charcoal);
+  color: color-mix(in srgb, var(--time-text) 70%, transparent);
   font-family: var(--font-sans);
+  transition: color 4s ease;
 }
 
 .footer-brand-mini {
   font-family: var(--font-serif);
   font-weight: 500;
-  color: var(--forest-green);
+  color: var(--time-text);
   font-style: italic;
   font-size: 1.1rem;
+  transition: color 4s ease;
 }
 
 .footer-separator {
-  color: var(--sage-green);
+  color: color-mix(in srgb, var(--time-text) 40%, transparent);
+  transition: color 4s ease;
 }
 
 .footer-link-mini {
   text-decoration: none;
-  color: var(--forest-green);
+  color: var(--time-text);
   transition: color 0.3s ease;
   font-weight: 500;
   display: flex;
@@ -939,12 +944,12 @@ h6 {
 }
 
 .footer-link-mini:hover {
-  color: var(--natural-brown);
+  color: var(--time-accent);
 }
 
 .footer-copyright {
-  color: var(--deep-charcoal);
-  opacity: 0.8;
+  color: color-mix(in srgb, var(--time-text) 60%, transparent);
+  transition: color 4s ease;
 }
 
 /* Review Modal */
