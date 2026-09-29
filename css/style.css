@@ -747,12 +747,15 @@ h6 {
 
 @media (max-width: 768px) {
   #map {
-    height: 300px;
+    height: 350px;
   }
   .map-overlay-info {
-    bottom: 16px;
-    left: 16px;
-    right: 16px;
+    position: relative;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    width: 100%;
+    margin-top: 12px;
     text-align: center;
   }
 }
