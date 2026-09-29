@@ -1190,6 +1190,10 @@ body.time-golden-hour .modal-content {
   .page-wrapper, .header-inner {
     padding: 0 20px;
   }
+
+  .site-header {
+    padding: 12px 0;
+  }
   
   .top-nav {
     flex-wrap: wrap;
@@ -1213,12 +1217,12 @@ body.time-golden-hour .modal-content {
   }
   
   .page-section {
-    padding: 20px 0;
+    padding: 10px 0;
     min-height: auto;
   }
   
   .hero-home {
-    min-height: calc(100vh - 90px);
+    min-height: auto;
   }
   
   .hero-title {
