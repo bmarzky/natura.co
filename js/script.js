@@ -725,8 +725,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const userLatLng = [userLat, userLng];
             const storeLatLng = [storeLat, storeLng];
 
-            // Call OSRM API for real road routing
-            const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${userLng},${userLat};${storeLng},${storeLat}?overview=full&geometries=geojson`;
+            // Call OSRM API for real road routing (using 'bike' for more direct/normal local roads instead of highways)
+            const osrmUrl = `https://router.project-osrm.org/route/v1/bike/${userLng},${userLat};${storeLng},${storeLat}?overview=full&geometries=geojson`;
             
             fetch(osrmUrl)
               .then(res => res.json())
