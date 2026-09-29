@@ -694,9 +694,7 @@ h6 {
 
 .map-container {
   position: relative;
-  width: 90vw;
-  max-width: 1100px;
-  margin: 0 auto;
+  width: 100%;
   border: 1px solid color-mix(in srgb, var(--time-text) 20%, transparent);
   border-radius: 20px;
   padding: 10px;

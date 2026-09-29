@@ -683,8 +683,12 @@ document.addEventListener('DOMContentLoaded', () => {
       iconAnchor: [22, 22]
     });
 
-    L.marker([storeLat, storeLng], {icon: storeIcon}).addTo(map)
+    const storeMarker = L.marker([storeLat, storeLng], {icon: storeIcon}).addTo(map)
       .bindPopup('<b style="font-family: var(--font-serif); font-size: 1.1rem; color: #183C2C;">natura house</b><br><span style="font-family: var(--font-sans); font-size: 0.8rem;">Dusun Teratai</span>');
+
+    storeMarker.on('click', function() {
+      map.flyTo([storeLat, storeLng], 19, { animate: true, duration: 1 });
+    });
 
     // Delivery Area Polygon (Kota Juang Boundary)
     if (typeof kotaJuangBoundary !== 'undefined') {
