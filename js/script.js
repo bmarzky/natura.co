@@ -6,6 +6,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const sections = document.querySelectorAll('.page-section');
   const navLinks = document.querySelectorAll('.nav-links a');
 
+  // Smooth scroll for all [data-scroll] links (no hash in URL)
+  document.querySelectorAll('[data-scroll]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetId = link.getAttribute('data-scroll');
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  });
+
+  // Active nav highlight on scroll
   window.addEventListener('scroll', () => {
     let current = '';
 
@@ -20,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     navLinks.forEach(link => {
       link.classList.remove('active');
-      if (link.getAttribute('href') === `#${current}`) {
+      if (link.getAttribute('data-scroll') === current) {
         link.classList.add('active');
       }
     });
