@@ -52,5 +52,4 @@ Proyek ini dibangun tanpa kerangka kerja (framework) berat untuk memastikan perf
    Anda cukup membuka file `index.html` di peramban (browser), atau disarankan menggunakan ekstensi seperti Live Server di VSCode untuk menangani pemuatan modul jika diperlukan di masa depan.
 
 ---
-Didesain dengan sepenuh hati untuk mengabadikan setiap momen keluarga.
-(c) 2026 natura.co
+(c) 2026 bmarzky
