@@ -666,7 +666,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const map = L.map('map', {
       zoomControl: true,
       scrollWheelZoom: true
-    }).setView([storeLat, storeLng], 13);
+    }).setView([storeLat, storeLng], 16);
 
     L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
       attribution: '&copy; Google Maps'
@@ -674,9 +674,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const storeIcon = L.divIcon({
       className: 'custom-store-marker',
-      html: `<div style="background-color: var(--time-accent); width: 20px; height: 20px; border-radius: 50%; border: 3px solid var(--time-bg); box-shadow: 0 0 10px rgba(0,0,0,0.5);"></div>`,
-      iconSize: [26, 26],
-      iconAnchor: [13, 13]
+      html: `
+        <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px;">
+          <div style="position: absolute; width: 100%; height: 100%; background-color: #d84b4b; border-radius: 50%; opacity: 0.2;"></div>
+          <div style="background-color: #d84b4b; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.4); position: relative; z-index: 2;"></div>
+        </div>
+      `,
+      iconSize: [44, 44],
+      iconAnchor: [22, 22]
     });
 
     L.marker([storeLat, storeLng], {icon: storeIcon}).addTo(map)
@@ -694,8 +699,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }).addTo(map);
 
-      // Fit map to show the whole area elegantly
-      map.fitBounds(boundaryLayer.getBounds(), { padding: [40, 40] });
+      // Fit map is disabled so it focuses closely on the store
+      // map.fitBounds(boundaryLayer.getBounds(), { padding: [40, 40] });
     }
   }
 });
