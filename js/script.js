@@ -665,12 +665,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const map = L.map('map', {
       zoomControl: true,
-      scrollWheelZoom: true
+      scrollWheelZoom: true,
+      attributionControl: false
     }).setView([storeLat, storeLng], 16);
 
-    L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-      attribution: '&copy; Google Maps'
-    }).addTo(map);
+    L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}').addTo(map);
 
     const storeIcon = L.divIcon({
       className: 'custom-store-marker',
