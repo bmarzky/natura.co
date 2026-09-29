@@ -901,7 +901,8 @@ h6 {
 
 /* Footer Segaris */
 .site-footer {
-  background-color: color-mix(in srgb, var(--time-bg) 85%, black);
+  background-color: color-mix(in srgb, var(--time-bg) 90%, transparent);
+  backdrop-filter: blur(8px);
   border-top: 1px solid color-mix(in srgb, var(--time-text) 15%, transparent);
   padding: 24px 40px;
   transition: background-color 4s ease, border-color 4s ease;
