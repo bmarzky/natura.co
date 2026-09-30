@@ -9,12 +9,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="js/config.js"></script>
   <script src="js/boundary.js"></script>
   <script src="js/script.js" defer></script>
@@ -85,7 +86,7 @@
             <h3 class="luxury-title">Classic Black Forest</h3>
             <p class="luxury-desc">"Sebuah rasa yang berawal dari dapur keluarga, dibuat untuk menemani momen bersama"
             </p>
-            <div class="luxury-price">IDR 250.000</div>
+            <div class="luxury-price">IDR -</div>
             <a href="https://wa.me/6281234567890?text=Halo%20natura%20house,%20saya%20ingin%20memesan%20Classic%20Black%20Forest."
               target="_blank" class="luxury-link">nikmati bersama<span class="arrow"></span></a>
           </div>
@@ -105,7 +106,8 @@
           <div class="map-overlay-info">
             <h4>Batas Pengiriman</h4>
             <p style="margin-bottom: 12px;">Seluruh area Kota Juang</p>
-            <button id="btnCheckDistance" class="btn-secondary" style="font-size: 0.75rem; padding: 8px 16px; width: 100%;">Cek Jarak Saya</button>
+            <button id="btnCheckDistance" class="btn-secondary"
+              style="font-size: 0.75rem; padding: 8px 16px; width: 100%;">Cek Jarak Saya</button>
           </div>
         </div>
       </section>
@@ -192,26 +194,114 @@
           <button type="submit" class="btn-secondary" style="width: 100%;">Kirim Cerita</button>
         </form>
       </div>
-      <div class="modal-success" id="modalSuccess" style="display: none;">
-        <div class="success-icon">♥</div>
-        <h4>Terima Kasih!</h4>
-        <p style="margin-bottom: 24px;">Cerita Anda sangat berarti dan telah menjadi bagian dari perjalanan kami.</p>
-        <div class="social-invite"
-          style="border-top: 1px solid color-mix(in srgb, var(--modal-muted) 30%, transparent); padding-top: 24px; margin-top: 24px;">
+      <div class="modal-success" id="modalSuccess"
+        style="display: none; text-align: center; padding: 24px 8px 8px 8px;">
+        <div class="success-icon"
+          style="display: inline-flex; justify-content: center; align-items: center; width: 72px; height: 72px; border-radius: 50%; background: color-mix(in srgb, var(--time-accent) 15%, transparent); color: var(--time-accent); font-size: 2.2rem; margin-bottom: 20px;">
+          ♥
+        </div>
+        <h4
+          style="font-family: var(--font-serif); font-size: 1.8rem; margin-bottom: 12px; font-weight: 500; color: var(--modal-text);">
+          Terima Kasih!</h4>
+        <p
+          style="margin-bottom: 32px; color: color-mix(in srgb, var(--modal-text) 80%, transparent); font-size: 1rem; line-height: 1.6; max-width: 90%; margin-left: auto; margin-right: auto;">
+          Cerita Anda telah tersimpan rapi dan menjadi bagian manis dari perjalanan Natura House.</p>
+
+        <div
+          style="border-top: 1px dashed color-mix(in srgb, var(--modal-text) 20%, transparent); padding-top: 24px; margin-top: 8px;">
           <p
-            style="font-size: 0.95rem; margin-bottom: 16px; color: var(--modal-muted); font-family: var(--font-serif);">
-            mari jalin kedekatan yang lebih erat</p>
-          <a href="https://www.instagram.com/naturahouse.official/" target="_blank" class="instagram-link">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+            style="font-size: 0.9rem; margin-bottom: 16px; color: color-mix(in srgb, var(--modal-text) 70%, transparent); font-family: var(--font-serif); font-style: italic;">
+            Abadikan momen ini...</p>
+          <button id="btnShareInstagram" class="btn-primary"
+            style="width: 100%; font-size: 0.95rem; padding: 14px; justify-content: center; align-items: center; gap: 10px; border-radius: 30px; display: inline-flex;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
               <path
                 d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.917 3.917 0 0 0-1.417.923A3.927 3.927 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.916 3.916 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.926 3.926 0 0 0-.923-1.417A3.911 3.911 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0h.003zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.036 1.204.166 1.486.275.373.145.64.319.92.599.28.28.453.546.598.92.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.47 2.47 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.478 2.478 0 0 1-.92-.598 2.48 2.48 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.233 0-2.136.008-2.388.046-3.231.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92.28-.28.546-.453.92-.598.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045v.002zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92zm-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217zm0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334z" />
             </svg>
-
-          </a>
+            Bagikan ke IG Story
+          </button>
         </div>
       </div>
-    </div>
-  </div>
+      <!-- Hidden Story Template -->
+      <!-- Hidden Story Template -->
+      <div id="storyTemplate"
+        style="position: absolute; top: -9999px; left: -9999px; width: 540px; height: 960px; background-color: #0b1711; background-image: radial-gradient(circle at 100% 0%, rgba(155, 130, 92, 0.15) 0%, transparent 60%), radial-gradient(circle at 0% 100%, rgba(155, 130, 92, 0.1) 0%, transparent 50%); color: #D9D7D2; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px; box-sizing: border-box; text-align: center; overflow: hidden; box-shadow: inset 0 0 100px rgba(0,0,0,0.5);">
+
+        <!-- Outer Fine Line Borders (Double frame) -->
+        <div
+          style="position: absolute; top: 16px; left: 16px; right: 16px; bottom: 16px; border: 1px solid rgba(155, 130, 92, 0.25); pointer-events: none; z-index: 1;">
+        </div>
+        <div
+          style="position: absolute; top: 22px; left: 22px; right: 22px; bottom: 22px; border: 1px solid rgba(155, 130, 92, 0.1); pointer-events: none; z-index: 1;">
+        </div>
+
+        <!-- Botanical Background Leaf Line Art -->
+        <img src="assets/images/leaf-bg.png" style="position: absolute; top: 22px; left: 22px; width: 496px; height: 916px; object-fit: cover; opacity: 0.04; mix-blend-mode: lighten; pointer-events: none; z-index: 1;" alt="Leaf Background">
+
+        <!-- Header -->
+        <div style="position: absolute; top: 80px; z-index: 2; width: 100%; text-align: center;">
+          <h1
+            style="font-family: 'Playfair Display', serif; font-size: 2.6rem; font-weight: 400; font-style: italic; color: #9B825C; margin: 0; letter-spacing: 2px;">
+            natura house</h1>
+          <div style="width: 40px; height: 1px; background-color: #9B825C; margin: 16px auto;"></div>
+          <p
+            style="font-family: 'Montserrat', sans-serif; font-size: 0.85rem; letter-spacing: 0.4em; text-transform: uppercase; color: rgba(217, 215, 210, 0.5); margin: 0;">
+            Cerita Pelanggan</p>
+        </div>
+
+        <!-- Main Quote Section -->
+        <div style="z-index: 2; width: 100%; padding: 0 40px; margin-top: 20px; text-align: center;">
+
+          <!-- Stars -->
+          <div id="storyStars" style="display: flex; justify-content: center; gap: 8px; margin-bottom: 40px;">
+            <!-- SVG stars injected here -->
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="#9B825C">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="#9B825C">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="#9B825C">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="#9B825C">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="#9B825C">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+          </div>
+
+          <!-- Quote -->
+          <div style="position: relative; display: inline-block; max-width: 100%;">
+            <blockquote id="storyText"
+              style="font-family: 'Montserrat', sans-serif; font-style: normal; font-size: 1.7rem; font-weight: 300; line-height: 1.6; margin: 0; color: #D9D7D2; position: relative; z-index: 2;">
+              “...”
+            </blockquote>
+          </div>
+
+          <!-- Name -->
+          <div
+            style="font-family: 'Montserrat', sans-serif; font-size: 1.1rem; letter-spacing: 0.15em; color: #9B825C; margin-top: 60px; text-transform: uppercase; font-weight: 500;">
+            <span id="storyName">Nama</span>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div
+          style="position: absolute; bottom: 70px; z-index: 2; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+          <div style="width: 1px; height: 50px; background-color: rgba(155, 130, 92, 0.3); margin-bottom: 20px;"></div>
+          <div
+            style="font-family: 'Montserrat', sans-serif; font-size: 1.1rem; opacity: 0.7; letter-spacing: 0.15em; display: flex; align-items: center; justify-content: center; gap: 10px; color: #D9D7D2; text-transform: lowercase;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+              <path
+                d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm7.5-6.923c-.67.204-1.335.82-1.887 1.855A7.97 7.97 0 0 0 5.145 4H7.5V1.077zM4.09 4a9.267 9.267 0 0 1 .64-1.539 6.7 6.7 0 0 1 .597-.933A7.025 7.025 0 0 0 2.255 4H4.09zm-.582 3.5c.03-.877.138-1.718.312-2.5H1.674a6.958 6.958 0 0 0-.656 2.5h2.49zM4.847 5a12.5 12.5 0 0 0-.338 2.5H7.5V5H4.847zM8.5 5v2.5h2.99a12.495 12.495 0 0 0-.337-2.5H8.5zM4.51 8.5a12.5 12.5 0 0 0 .337 2.5H7.5V8.5H4.51zm3.99 0V11h2.653c.187-.765.306-1.608.338-2.5H8.5zM5.145 12c.138.386.295.744.468 1.068.552 1.035 1.218 1.65 1.887 1.855V12H5.145zm.182 2.472a6.696 6.696 0 0 1-.597-.933A9.268 9.268 0 0 1 4.09 12H2.255a7.024 7.024 0 0 0 3.072 2.472zM3.82 11a13.652 13.652 0 0 1-.312-2.5h-2.49c.062.89.291 1.733.656 2.5H3.82zm6.853 3.472A7.024 7.024 0 0 0 13.745 12H11.91a9.27 9.27 0 0 1-.64 1.539 6.688 6.688 0 0 1-.597.933zM8.5 12v2.923c.67-.204 1.335-.82 1.887-1.855.173-.324.33-.682.468-1.068H8.5zm3.68-1h2.146c.365-.767.594-1.61.656-2.5h-2.49a13.65 13.65 0 0 1-.312 2.5zm2.802-3.5a6.959 6.959 0 0 0-.656-2.5H12.18c.174.782.282 1.623.312 2.5h2.49zM11.27 2.461c.247.464.462.98.64 1.539h1.835a7.024 7.024 0 0 0-3.072-2.472c.218.284.418.598.597.933zM10.855 4c-.173-.386-.33-.744-.468-1.068C9.835 1.897 9.17 1.282 8.5 1.077V4h2.355z" />
+            </svg>
+            https://natura-house.shop/
+          </div>
+        </div>
+
+      </div>
 </body>
 
 </html>

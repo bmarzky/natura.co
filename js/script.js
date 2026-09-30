@@ -582,11 +582,11 @@ document.addEventListener('DOMContentLoaded', () => {
     reviewForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      // Rate limiting: max 1 review per 5 minutes per device
+      // Rate limiting: max 1 review per 10 detik (agar mudah ditest)
       const lastReviewTime = localStorage.getItem('natura_last_review_time');
       if (lastReviewTime) {
         const timeSinceLast = Date.now() - parseInt(lastReviewTime);
-        if (timeSinceLast < 5 * 60 * 1000) {
+        if (timeSinceLast < 10 * 1000) {
           showToast("Tunggu sebentar sebelum membagikan cerita lagi.");
           return;
         }
@@ -646,6 +646,92 @@ document.addEventListener('DOMContentLoaded', () => {
 
         modalFormContainer.style.display = 'none';
         modalSuccess.style.display = 'block';
+
+        // Story Preview Generation (Background)
+        const storyTemplate = document.getElementById('storyTemplate');
+        const storyStars = document.getElementById('storyStars');
+        const storyTextEl = document.getElementById('storyText');
+        const storyNameEl = document.getElementById('storyName');
+        const btnShareInstagram = document.getElementById('btnShareInstagram');
+
+        if (storyTemplate && window.html2canvas) {
+          // Populate template
+          let starsHtml = '';
+          const svgStarFilled = `<svg width="22" height="22" viewBox="0 0 24 24" fill="#C8A97E"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+          const svgStarEmpty = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C8A97E" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+          
+          for (let i = 0; i < 5; i++) {
+            starsHtml += i < rating ? svgStarFilled : svgStarEmpty;
+          }
+          storyStars.innerHTML = starsHtml;
+          storyTextEl.textContent = `“${text}”`;
+          storyNameEl.textContent = name;
+
+          // Tampilkan tombol
+          btnShareInstagram.style.display = 'inline-flex';
+
+          btnShareInstagram.onclick = () => {
+            const originalText = btnShareInstagram.innerHTML;
+            btnShareInstagram.innerHTML = "Menyiapkan Cerita...";
+            btnShareInstagram.disabled = true;
+
+            setTimeout(() => {
+              html2canvas(storyTemplate, {
+                scale: 2, // High quality
+                backgroundColor: '#183C2C'
+              }).then(async canvas => {
+                const imgData = canvas.toDataURL('image/png');
+
+                try {
+                  // Try using Web Share API first
+                  if (navigator.share && navigator.canShare) {
+                    const res = await fetch(imgData);
+                    const blob = await res.blob();
+                    const file = new File([blob], 'natura-house-story.png', { type: 'image/png' });
+                    
+                    if (navigator.canShare({ files: [file] })) {
+                      await navigator.share({
+                        files: [file],
+                        title: 'Cerita natura house',
+                        text: 'Momen manis bersama @naturahouse.official'
+                      });
+                      btnShareInstagram.innerHTML = originalText;
+                      btnShareInstagram.disabled = false;
+                      return;
+                    }
+                  }
+                  
+                  // Fallback: Download Image
+                  const a = document.createElement('a');
+                  a.href = imgData;
+                  a.download = 'natura-house-story.png';
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  
+                  showToast('Gambar disimpan! Membuka Instagram...');
+                  
+                  // Try to open Instagram camera (works on some mobile devices)
+                  setTimeout(() => {
+                    window.location.href = "instagram://story-camera";
+                  }, 800);
+                  
+                } catch (err) {
+                  console.error("Gagal membagikan:", err);
+                  showToast('Silakan buka Instagram dan buat Story dari galeri Anda.');
+                }
+
+                btnShareInstagram.innerHTML = originalText;
+                btnShareInstagram.disabled = false;
+              }).catch(err => {
+                console.error("Gagal membuat cerita:", err);
+                showToast("Gagal menyiapkan gambar.");
+                btnShareInstagram.innerHTML = originalText;
+                btnShareInstagram.disabled = false;
+              });
+            }, 100);
+          };
+        }
 
       } catch (err) {
         console.error("Gagal mengirim ulasan:", err);
