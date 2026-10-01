@@ -222,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!data || data.length === 0) {
       if (ratingNumEl) ratingNumEl.innerHTML = `0.0`;
-      if (starsEl) starsEl.textContent = '☆☆☆☆☆';
+      if (starsEl) starsEl.textContent = '★★★★★';
       if (countEl) countEl.textContent = 'Dari 0 Momen Keluarga';
       return;
     }
@@ -900,3 +900,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 });
+
+
+
+
