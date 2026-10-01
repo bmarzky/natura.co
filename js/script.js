@@ -479,7 +479,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const MAX_WORDS = 25;
 
   if (btnShareStory && reviewModal) {
-    btnShareStory.addEventListener('click', () => {
+    function openReviewModal() {
       reviewModal.classList.add('active');
       modalFormContainer.style.display = 'block';
       modalSuccess.style.display = 'none';
@@ -490,7 +490,14 @@ document.addEventListener('DOMContentLoaded', () => {
         wordCounter.textContent = `0/${MAX_WORDS}`;
         wordCounter.style.color = 'var(--modal-muted)';
       }
-    });
+    }
+
+    btnShareStory.addEventListener('click', openReviewModal);
+
+    // Auto-open modal if URL contains special link
+    if (window.location.hash === '#review' || window.location.hash === '#cerita' || window.location.search.includes('review=true')) {
+      setTimeout(openReviewModal, 600);
+    }
 
     if (reviewText && wordCounter) {
       reviewText.addEventListener('input', () => {
