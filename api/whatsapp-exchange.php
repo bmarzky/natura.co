@@ -120,7 +120,7 @@ if (
 */
 
 $url =
-    'https://graph.facebook.com/v25.0/oauth/access_token';
+    'https://graph.facebook.com/v26.0/oauth/access_token';
 
 
 $data = [
@@ -133,6 +133,9 @@ $data = [
 
     'code' =>
         $code,
+
+    'redirect_uri' =>
+        'https://natura-house.shop/api/whatsapp-connect.html',
 
     'grant_type' =>
         'authorization_code'
