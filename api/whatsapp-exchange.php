@@ -135,7 +135,7 @@ $data = [
         $code,
 
     'redirect_uri' =>
-        '',
+        'https://developers.facebook.com/es/oauth/callback/?product_route=whatsapp-business&business_id=1548900637261966&nonce=jvdkWeNWehszlaSNFAaXAMRgyk0xrpPx',
 
     'grant_type' =>
         'authorization_code'

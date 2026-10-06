@@ -29,17 +29,23 @@
         const status =
             document.getElementById("status");
 
-        window.fbAsyncInit = function() {
-            FB.init({
-                appId            : APP_ID,
-                autoLogAppEvents : true,
-                cookie           : true,
-                xfbml            : true,
-                version          : 'v26.0'
-            });
-            status.textContent = "Siap menghubungkan WhatsApp.";
-            button.disabled = false;
-        };
+        window.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get("code");
+            const error = urlParams.get("error");
+            
+            if (error) {
+                status.textContent = "Proses dibatalkan atau terjadi kesalahan: " + error;
+                button.disabled = false;
+            } else if (code) {
+                // Hapus code dari URL agar tidak terkirim ulang saat refresh
+                window.history.replaceState({}, document.title, window.location.pathname);
+                exchangeAuthorizationCode(code);
+            } else {
+                status.textContent = "Siap menghubungkan WhatsApp.";
+                button.disabled = false;
+            }
+        });
 
 
         async function exchangeAuthorizationCode(code) {
@@ -102,32 +108,14 @@
 
                 button.disabled = false;
             }
-        const fbLoginCallback = (response) => {
-            if (response.authResponse && response.authResponse.code) {
-                const code = response.authResponse.code;
-                exchangeAuthorizationCode(code);
-            } else {
-                status.textContent = "Proses dibatalkan atau authorization code tidak diterima.";
-                button.disabled = false;
-            }
-        };
-
-        const launchWhatsAppSignup = () => {
+        button.addEventListener("click", function () {
             status.textContent = "Membuka proses koneksi WhatsApp...";
             button.disabled = true;
 
-            FB.login(fbLoginCallback, {
-                config_id: CONFIG_ID,
-                response_type: 'code',
-                override_default_response_type: true,
-                extras: {"version":"v4"}
-            });
-        };
-
-        button.addEventListener("click", launchWhatsAppSignup);
+            const oauthUrl = "https://business.facebook.com/messaging/whatsapp/onboard/?app_id=2142207263837515&config_id=1744117243364052&extras=%7B%22sessionInfoVersion%22%3A%223%22%2C%22version%22%3A%22v4%22%7D";
+            window.location.href = oauthUrl;
+        });
     </script>
-
-    <!-- Facebook JavaScript SDK -->
-    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script></body>
+</body>
 
 </html>
