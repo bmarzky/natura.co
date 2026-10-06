@@ -8,17 +8,23 @@
 </head>
 
 <body>
+
     <h1>Hubungkan WhatsApp Natura House</h1>
 
     <button id="connect-whatsapp" type="button">
         Hubungkan WhatsApp
     </button>
 
-    <p id="status" aria-live="polite"></p>
+    <p id="status" aria-live="polite">
+        Memuat...
+    </p>
 
     <script>
         const APP_ID = "2142207263837515";
         const CONFIG_ID = "1744117243364052";
+
+        const button = document.getElementById("connect-whatsapp");
+        const status = document.getElementById("status");
 
         window.fbAsyncInit = function () {
             FB.init({
@@ -28,38 +34,92 @@
                 version: "v26.0"
             });
 
-            document.getElementById("status").textContent =
-                "Siap menghubungkan WhatsApp.";
+            status.textContent = "Siap menghubungkan WhatsApp.";
+            button.disabled = false;
         };
 
-        document.getElementById("connect-whatsapp").addEventListener("click", function () {
-            const status = document.getElementById("status");
+        button.disabled = true;
 
-            if (typeof FB === "undefined") {
-                status.textContent = "Facebook SDK belum siap. Coba lagi.";
-                return;
-            }
+        button.addEventListener("click", function () {
 
-            status.textContent = "Membuka proses koneksi WhatsApp...";
+            status.textContent =
+                "Membuka proses koneksi WhatsApp...";
+
+            button.disabled = true;
 
             FB.login(
-                function (response) {
-                    console.log("Embedded Signup response:", response);
+                async function (response) {
 
-                    if (response.authResponse) {
+                    if (
+                        !response.authResponse ||
+                        !response.authResponse.code
+                    ) {
                         status.textContent =
-                            "Otorisasi berhasil diterima. Detail tersedia di console.";
-                    } else {
-                        status.textContent =
-                            "Proses dibatalkan atau belum selesai.";
+                            "Proses dibatalkan atau authorization code tidak diterima.";
+
+                        button.disabled = false;
+                        return;
                     }
+
+                    status.textContent =
+                        "Authorization berhasil. Memproses koneksi...";
+
+                    const code = response.authResponse.code;
+
+                    try {
+
+                        const exchangeResponse = await fetch(
+                            "/api/whatsapp-exchange.php",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+
+                                body: JSON.stringify({
+                                    code: code
+                                })
+                            }
+                        );
+
+                        const result = await exchangeResponse.json();
+
+                        if (
+                            exchangeResponse.ok &&
+                            result.success
+                        ) {
+
+                            status.textContent =
+                                "Koneksi WhatsApp berhasil diproses.";
+
+                        } else {
+
+                            status.textContent =
+                                "Gagal memproses koneksi WhatsApp.";
+                        }
+
+                    } catch (error) {
+
+                        status.textContent =
+                            "Terjadi kesalahan saat menghubungi server.";
+
+                    } finally {
+
+                        button.disabled = false;
+                    }
+
                 },
                 {
                     config_id: CONFIG_ID,
+
                     response_type: "code",
+
                     override_default_response_type: true,
+
                     extras: {
-                        featureType: "whatsapp_business_app_onboarding"
+                        featureType:
+                            "whatsapp_business_app_onboarding"
                     }
                 }
             );
@@ -68,6 +128,7 @@
 
     <script>
         (function (d, s, id) {
+
             var js;
             var fjs = d.getElementsByTagName(s)[0];
 
@@ -77,10 +138,14 @@
 
             js = d.createElement(s);
             js.id = id;
-            js.src = "https://connect.facebook.net/en_US/sdk.js";
+            js.src =
+                "https://connect.facebook.net/en_US/sdk.js";
+
             fjs.parentNode.insertBefore(js, fjs);
+
         })(document, "script", "facebook-jssdk");
     </script>
+
 </body>
 
 </html>
