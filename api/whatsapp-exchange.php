@@ -135,7 +135,7 @@ $data = [
         $code,
 
     'redirect_uri' =>
-        'https://natura-house.shop/api/whatsapp-connect.html',
+        'https://natura-house.shop/',
 
     'grant_type' =>
         'authorization_code'
