@@ -2,75 +2,295 @@
 
 header('Content-Type: application/json; charset=utf-8');
 
+
+/*
+|--------------------------------------------------------------------------
+| Only allow POST
+|--------------------------------------------------------------------------
+*/
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+
     http_response_code(405);
+
     echo json_encode([
         'success' => false,
         'error' => 'Method not allowed'
     ]);
+
     exit;
 }
 
-$input = json_decode(file_get_contents('php://input'), true);
-$code = $input['code'] ?? '';
 
-if (!$code) {
+/*
+|--------------------------------------------------------------------------
+| Read JSON input
+|--------------------------------------------------------------------------
+*/
+
+$rawInput =
+    file_get_contents('php://input');
+
+$input =
+    json_decode($rawInput, true);
+
+
+if (!is_array($input)) {
+
     http_response_code(400);
+
+    echo json_encode([
+        'success' => false,
+        'error' => 'Invalid JSON request'
+    ]);
+
+    exit;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Authorization code
+|--------------------------------------------------------------------------
+*/
+
+$code =
+    $input['code'] ?? '';
+
+
+if ($code === '') {
+
+    http_response_code(400);
+
     echo json_encode([
         'success' => false,
         'error' => 'Authorization code is required'
     ]);
+
     exit;
 }
 
-$config = require '/home/naturash/meta_config.php';
 
-$appId = $config['meta_app_id'];
-$appSecret = $config['meta_app_secret'];
+/*
+|--------------------------------------------------------------------------
+| Redirect URI
+|--------------------------------------------------------------------------
+|
+| Must be identical to the redirect_uri used
+| during the OAuth authorization request.
+|
+*/
 
-$redirectUri = 'https://developers.facebook.com/es/oauth/callback/?product_route=whatsapp-business&business_id=1548900637261966&nonce=jvdkWeNWehszlaSNFAaXAMRgyk0xrpPx';
+$redirectUri =
+    $input['redirect_uri']
+    ?? '';
 
-$url = 'https://graph.facebook.com/v25.0/oauth/access_token';
 
-$data = [
-    'client_id' => $appId,
-    'client_secret' => $appSecret,
-    'code' => $code,
-    'redirect_uri' => $redirectUri,
-    'grant_type' => 'authorization_code'
-];
+if ($redirectUri === '') {
 
-$ch = curl_init($url);
+    http_response_code(400);
 
-curl_setopt_array($ch, [
-    CURLOPT_POST => true,
-    CURLOPT_POSTFIELDS => json_encode($data),
-    CURLOPT_HTTPHEADER => [
-        'Content-Type: application/json'
-    ],
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_TIMEOUT => 30
-]);
-
-$response = curl_exec($ch);
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-if ($response === false) {
-    curl_close($ch);
-
-    http_response_code(500);
     echo json_encode([
         'success' => false,
-        'error' => 'Failed to connect to Meta'
+        'error' => 'Redirect URI is required'
     ]);
+
     exit;
 }
+
+
+/*
+|--------------------------------------------------------------------------
+| Security: only allow our own redirect URI
+|--------------------------------------------------------------------------
+*/
+
+$allowedRedirectUri =
+    'https://natura-house.shop/api/whatsapp-connect.html';
+
+
+if ($redirectUri !== $allowedRedirectUri) {
+
+    http_response_code(400);
+
+    echo json_encode([
+        'success' => false,
+        'error' => 'Invalid redirect URI'
+    ]);
+
+    exit;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Load Meta configuration
+|--------------------------------------------------------------------------
+|
+| File location:
+| /home/naturash/meta_config.php
+|
+| This file must remain outside public_html.
+|
+*/
+
+$config =
+    require '/home/naturash/meta_config.php';
+
+
+$appId =
+    $config['meta_app_id']
+    ?? '';
+
+$appSecret =
+    $config['meta_app_secret']
+    ?? '';
+
+
+if (
+    $appId === '' ||
+    $appSecret === ''
+) {
+
+    http_response_code(500);
+
+    echo json_encode([
+        'success' => false,
+        'error' => 'Meta configuration is incomplete'
+    ]);
+
+    exit;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Meta OAuth endpoint
+|--------------------------------------------------------------------------
+*/
+
+$url =
+    'https://graph.facebook.com/v25.0/oauth/access_token';
+
+
+$data = [
+
+    'client_id' =>
+        $appId,
+
+    'client_secret' =>
+        $appSecret,
+
+    'code' =>
+        $code,
+
+    'redirect_uri' =>
+        $redirectUri,
+
+    'grant_type' =>
+        'authorization_code'
+];
+
+
+/*
+|--------------------------------------------------------------------------
+| Server-to-server request to Meta
+|--------------------------------------------------------------------------
+*/
+
+$ch =
+    curl_init($url);
+
+
+curl_setopt_array(
+    $ch,
+    [
+
+        CURLOPT_POST =>
+            true,
+
+        CURLOPT_POSTFIELDS =>
+            json_encode($data),
+
+        CURLOPT_HTTPHEADER =>
+            [
+                'Content-Type: application/json'
+            ],
+
+        CURLOPT_RETURNTRANSFER =>
+            true,
+
+        CURLOPT_TIMEOUT =>
+            30
+    ]
+);
+
+
+$response =
+    curl_exec($ch);
+
+
+$httpCode =
+    curl_getinfo(
+        $ch,
+        CURLINFO_HTTP_CODE
+    );
+
+
+$curlError =
+    curl_error($ch);
+
 
 curl_close($ch);
 
-$result = json_decode($response, true);
 
-if ($httpCode < 200 || $httpCode >= 300) {
+/*
+|--------------------------------------------------------------------------
+| cURL error
+|--------------------------------------------------------------------------
+*/
+
+if ($response === false) {
+
+    error_log(
+        'Meta token exchange cURL error: ' .
+        $curlError
+    );
+
+    http_response_code(500);
+
+    echo json_encode([
+        'success' => false,
+        'error' => 'Unable to connect to Meta'
+    ]);
+
+    exit;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Decode Meta response
+|--------------------------------------------------------------------------
+*/
+
+$result =
+    json_decode(
+        $response,
+        true
+    );
+
+
+/*
+|--------------------------------------------------------------------------
+| Meta returned an error
+|--------------------------------------------------------------------------
+*/
+
+if (
+    $httpCode < 200 ||
+    $httpCode >= 300
+) {
 
     error_log(
         'Meta token exchange failed. HTTP ' .
@@ -82,14 +302,40 @@ if ($httpCode < 200 || $httpCode >= 300) {
     http_response_code(500);
 
     echo json_encode([
-        'success' => false,
-        'error' => 'Meta token exchange failed'
+
+        'success' =>
+            false,
+
+        'error' =>
+            'Meta token exchange failed',
+
+        'meta_http_code' =>
+            $httpCode,
+
+        'meta_response' =>
+            $result
     ]);
 
     exit;
 }
 
+
+/*
+|--------------------------------------------------------------------------
+| Success
+|--------------------------------------------------------------------------
+|
+| IMPORTANT:
+| For now we do not store or expose the access token.
+| We only verify that Meta accepted the exchange.
+|
+*/
+
 echo json_encode([
-    'success' => true,
-    'message' => 'Authorization code successfully exchanged.'
+
+    'success' =>
+        true,
+
+    'message' =>
+        'Authorization code successfully exchanged.'
 ]);
