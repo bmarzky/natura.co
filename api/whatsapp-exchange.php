@@ -160,11 +160,11 @@ curl_setopt_array(
             true,
 
         CURLOPT_POSTFIELDS =>
-            json_encode($data),
+            http_build_query($data),
 
         CURLOPT_HTTPHEADER =>
             [
-                'Content-Type: application/json'
+                'Content-Type: application/x-www-form-urlencoded'
             ],
 
         CURLOPT_RETURNTRANSFER =>
