@@ -2,13 +2,9 @@
 require_once __DIR__ . '/../core/whatsapp_api.php';
 
 function prosesPesanMasuk($senderPhone, $messageId, $messageText) {
-    // 1. Tampilkan status "sedang mengetik..."
     kirimStatusTypingWhatsApp($messageId);
-    
-    // 2. Beri jeda agar natural
     sleep(2);
 
-    // 3. Tentukan Balasan Bot (Intent Parsing)
     $text = strtolower($messageText);
     
     if (strpos($text, 'halo') !== false || strpos($text, 'hai') !== false) {
@@ -23,7 +19,6 @@ function prosesPesanMasuk($senderPhone, $messageId, $messageText) {
         $replyText = "Halo! Ini adalah balasan otomatis Natura House. Pesan Anda: " . $messageText;
     }
 
-    // 4. Kirim Balasan
     kirimBalasanWhatsApp($senderPhone, $replyText);
 }
 ?>
