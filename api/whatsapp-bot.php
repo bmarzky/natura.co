@@ -45,6 +45,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     $data = json_decode($input, true);
 
+    // OPTIMASI: Langsung berikan respons HTTP 200 OK ke Facebook secepat mungkin
+    // Ini mencegah delay dari server Facebook
+    http_response_code(200);
+    if (function_exists('fastcgi_finish_request')) {
+        fastcgi_finish_request(); // Menutup koneksi dengan Facebook agar mereka tidak menunggu
+    }
+
     // Cek apakah ini benar-benar pesan WhatsApp
     if (isset($data['object']) && $data['object'] === 'whatsapp_business_account') {
         foreach ($data['entry'] as $entry) {
@@ -52,9 +59,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (isset($change['value']['messages'])) {
                     $message = $change['value']['messages'][0];
                     $senderPhone = $message['from']; // Nomor pengirim
+                    $messageId = $message['id']; // ID pesan (dibutuhkan untuk typing indicator)
                     $messageText = strtolower($message['text']['body'] ?? ''); // Isi teks pengirim
 
-                    // Tentukan Balasan Bot
+                    // 1. Ubah centang menjadi biru (Read) dan tampilkan status "sedang mengetik..."
+                    kirimStatusTypingWhatsApp($messageId, $phoneNumberId, $accessToken);
+                    
+                    // 2. Beri jeda 2 detik agar terlihat natural seperti manusia yang sedang mengetik
+                    sleep(2);
+
+                    // 3. Tentukan Balasan Bot
                     $replyText = "Halo! Ini adalah balasan otomatis dari Natura House. Pesan Anda: " . $messageText;
 
                     if (strpos($messageText, 'halo') !== false) {
@@ -63,15 +77,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $replyText = "Untuk informasi harga, silakan kunjungi katalog di website kami ya!";
                     }
 
-                    // Kirim Balasan (Send Message API)
+                    // 4. Kirim Balasan (Send Message API)
                     kirimBalasanWhatsApp($senderPhone, $replyText, $phoneNumberId, $accessToken);
                 }
             }
         }
-        http_response_code(200);
-        exit;
     }
-    http_response_code(404);
+    exit;
 }
 
 // ==========================================
@@ -104,5 +116,32 @@ function kirimBalasanWhatsApp($to, $text, $phoneNumberId, $accessToken) {
     
     // Log response untuk debugging
     error_log("WhatsApp Reply Response: " . $response);
+}
+
+// ==========================================
+// FUNGSI UNTUK MENAMPILKAN "SEDANG MENGETIK..."
+// ==========================================
+function kirimStatusTypingWhatsApp($messageId, $phoneNumberId, $accessToken) {
+    $url = "https://graph.facebook.com/v20.0/" . $phoneNumberId . "/messages";
+
+    $data = [
+        'messaging_product' => 'whatsapp',
+        'status' => 'read',
+        'message_id' => $messageId,
+        'typing_indicator' => [
+            'type' => 'text'
+        ]
+    ];
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Authorization: Bearer ' . $accessToken,
+        'Content-Type: application/json'
+    ]);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_exec($ch);
+    curl_close($ch);
 }
 ?>
