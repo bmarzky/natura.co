@@ -6,3 +6,7 @@ js/config.js
 # OS
 .DS_Store
 Thumbs.db
+
+# Backend Secrets
+api/config.php
+api/webhook_log.txt

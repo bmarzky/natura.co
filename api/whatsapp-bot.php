@@ -3,15 +3,12 @@
 // PENGATURAN CHATBOT WHATSAPP NATURA HOUSE
 // ==========================================
 
-// 1. Masukkan Access Token yang Anda dapatkan setelah klik "Generate token"
-$accessToken = 'EAAXSP4fgN0ABSh7iFNRiURlDcUCC8A6lQ6zdZBZA4VkJpbeDFmb0tCU12bNdDMSNrdvNQdWXZAaRTx7VM8B3U2uVZCGRrkb33GRQKQEP4rDC0npPxxtMEzT52jphqH8ZBKjHP6NlZBtBaja4zcYGafQPbyJobbik5e48DZAIPHmCLz99bHXWsl99pJLjnmGAzNmZCGRZAivhllQoMpnNdvalMkv00oNHERQFRrH22yZCxaKnWfZCQoZCN8LfaRX2zokKGWOPCqRTRYgKen6TXJsRUWCJHQVp';
-
-// 2. Phone Number ID Anda (sudah saya masukkan berdasarkan foto)
-$phoneNumberId = '1394926080368074';
-
-// 3. Buat password rahasia untuk verifikasi Webhook (Anda akan masukkan ini di dashboard Meta nanti)
-$verifyToken = 'natura_house_secret_token';
-
+// Panggil file konfigurasi rahasia (Pastikan config.php tidak diunggah ke GitHub!)
+if (!file_exists('config.php')) {
+    http_response_code(500);
+    die("Error: File config.php tidak ditemukan di server. Silakan buat berdasarkan config.example.php");
+}
+require_once 'config.php';
 
 // ==========================================
 // LOGIKA 1: VERIFIKASI WEBHOOK DARI META
