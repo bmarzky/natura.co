@@ -3,7 +3,7 @@
 
 natura.co adalah platform digital komprehensif untuk brand kue klasik. Proyek ini memadukan *landing page* bergaya editorial premium dengan **Sistem Chatbot WhatsApp Cerdas (Cloud API)** untuk otomatisasi layanan dan pengalaman emosional pelanggan yang tak tertandingi.
 
-## ✨ Fitur Utama
+## Fitur Utama
 
 ### 1. WhatsApp Cloud API Chatbot (Baru)
 - **Arsitektur Enterprise:** Dibangun dengan struktur modular (`config`, `core`, `handlers`) di folder `api/` untuk pemisahan logika dan keamanan tingkat tinggi.
@@ -17,12 +17,12 @@ natura.co adalah platform digital komprehensif untuk brand kue klasik. Proyek in
 - **Keamanan Front-End:** Dilengkapi dengan fitur *Anti-XSS Sanitization* dan *Rate Limiter* untuk mencegah *spam*.
 - **UI/UX Elegan:** Dilengkapi interaksi mikro, efek *hover lift*, animasi *scroll-reveal*, dan tipografi yang memanjakan mata.
 
-## 🛠️ Teknologi yang Digunakan
+## Teknologi yang Digunakan
 - **Frontend:** HTML5 Semantik, Vanilla CSS3 (Custom Properties), Vanilla JavaScript (IntersectionObserver, Canvas API).
 - **Backend (Chatbot):** PHP 8+, cURL, Webhooks, Meta Graph API v20.0.
 - **Database (Ulasan):** Supabase (PostgreSQL) dengan Row Level Security (RLS).
 
-## 🚀 Panduan Pengaturan Server (Deployment)
+## Panduan Pengaturan Server (Deployment)
 
 ### 1. Unduh Repositori
 ```bash
