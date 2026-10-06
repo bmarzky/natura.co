@@ -39,6 +39,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Ambil isi pesan masuk (format JSON)
     $input = file_get_contents('php://input');
+    
+    // Log semua input yang masuk untuk debugging
+    file_put_contents('webhook_log.txt', date('[Y-m-d H:i:s] ') . $input . PHP_EOL, FILE_APPEND);
+    
     $data = json_decode($input, true);
 
     // Cek apakah ini benar-benar pesan WhatsApp
