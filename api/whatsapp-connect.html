@@ -29,20 +29,23 @@
         const status =
             document.getElementById("status");
 
-        window.fbAsyncInit = function () {
-
-            FB.init({
-                appId: APP_ID,
-                cookie: true,
-                xfbml: false,
-                version: "v26.0"
-            });
-
-            status.textContent =
-                "Siap menghubungkan WhatsApp.";
-
-            button.disabled = false;
-        };
+        window.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get("code");
+            const error = urlParams.get("error");
+            
+            if (error) {
+                status.textContent = "Proses dibatalkan atau terjadi kesalahan: " + error;
+                button.disabled = false;
+            } else if (code) {
+                // Hapus code dari URL agar tidak terkirim ulang saat refresh
+                window.history.replaceState({}, document.title, window.location.pathname);
+                exchangeAuthorizationCode(code);
+            } else {
+                status.textContent = "Siap menghubungkan WhatsApp.";
+                button.disabled = false;
+            }
+        });
 
 
         async function exchangeAuthorizationCode(code) {
@@ -108,89 +111,26 @@
         }
 
 
-        button.addEventListener(
-            "click",
-            function () {
+        button.addEventListener("click", function () {
+            status.textContent = "Membuka proses koneksi WhatsApp...";
+            button.disabled = true;
 
-                status.textContent =
-                    "Membuka proses koneksi WhatsApp...";
+            const redirectUri = "https://natura-house.shop/api/whatsapp-connect.html";
+            const extras = JSON.stringify({ featureType: "whatsapp_business_app_onboarding" });
 
-                button.disabled = true;
+            const oauthUrl = `https://www.facebook.com/v26.0/dialog/oauth?` +
+                `client_id=${APP_ID}` +
+                `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+                `&response_type=code` +
+                `&config_id=${CONFIG_ID}` +
+                `&extras=${encodeURIComponent(extras)}`;
 
-                FB.login(
-                    function (response) {
-
-                        console.log(
-                            "Facebook login response:",
-                            response
-                        );
-
-                        if (
-                            !response.authResponse ||
-                            !response.authResponse.code
-                        ) {
-
-                            status.textContent =
-                                "Proses dibatalkan atau authorization code tidak diterima.";
-
-                            button.disabled = false;
-
-                            return;
-                        }
-
-                        const code =
-                            response.authResponse.code;
-
-                        exchangeAuthorizationCode(code);
-                    },
-                    {
-                        config_id: CONFIG_ID,
-
-                        response_type: "code",
-
-                        override_default_response_type: true,
-
-                        redirect_uri:
-                            "https://natura-house.shop/api/whatsapp-connect.html",
-
-                        extras: {
-                            featureType:
-                                "whatsapp_business_app_onboarding"
-                        }
-                    }
-                );
-            }
-        );
+            window.location.href = oauthUrl;
+        });
     </script>
 
 
-    <!-- Facebook JavaScript SDK -->
-    <script>
-        (function (d, s, id) {
 
-            var js;
-            var fjs =
-                d.getElementsByTagName(s)[0];
-
-            if (d.getElementById(id)) {
-                return;
-            }
-
-            js =
-                d.createElement(s);
-
-            js.id = id;
-
-            js.src =
-                "https://connect.facebook.net/en_US/sdk.js";
-
-            fjs.parentNode.insertBefore(
-                js,
-                fjs
-            );
-
-        })(document, "script", "facebook-jssdk");
-    </script>
 
 </body>
 
