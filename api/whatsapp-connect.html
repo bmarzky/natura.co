@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hubungkan WhatsApp — Natura House</title>
+</head>
+
+<body>
+    <h1>Hubungkan WhatsApp Natura House</h1>
+
+    <button id="connect-whatsapp" type="button">
+        Hubungkan WhatsApp
+    </button>
+
+    <p id="status" aria-live="polite"></p>
+
+    <script>
+        const APP_ID = "2142207263837515";
+        const CONFIG_ID = "1744117243364052";
+
+        window.fbAsyncInit = function () {
+            FB.init({
+                appId: APP_ID,
+                cookie: true,
+                xfbml: false,
+                version: "v26.0"
+            });
+
+            document.getElementById("status").textContent =
+                "Siap menghubungkan WhatsApp.";
+        };
+
+        document.getElementById("connect-whatsapp").addEventListener("click", function () {
+            const status = document.getElementById("status");
+
+            if (typeof FB === "undefined") {
+                status.textContent = "Facebook SDK belum siap. Coba lagi.";
+                return;
+            }
+
+            status.textContent = "Membuka proses koneksi WhatsApp...";
+
+            FB.login(
+                function (response) {
+                    console.log("Embedded Signup response:", response);
+
+                    if (response.authResponse) {
+                        status.textContent =
+                            "Otorisasi berhasil diterima. Detail tersedia di console.";
+                    } else {
+                        status.textContent =
+                            "Proses dibatalkan atau belum selesai.";
+                    }
+                },
+                {
+                    config_id: CONFIG_ID,
+                    response_type: "code",
+                    override_default_response_type: true,
+                    extras: {
+                        featureType: "whatsapp_business_app_onboarding"
+                    }
+                }
+            );
+        });
+    </script>
+
+    <script>
+        (function (d, s, id) {
+            var js;
+            var fjs = d.getElementsByTagName(s)[0];
+
+            if (d.getElementById(id)) {
+                return;
+            }
+
+            js = d.createElement(s);
+            js.id = id;
+            js.src = "https://connect.facebook.net/en_US/sdk.js";
+            fjs.parentNode.insertBefore(js, fjs);
+        })(document, "script", "facebook-jssdk");
+    </script>
+</body>
+
+</html>
