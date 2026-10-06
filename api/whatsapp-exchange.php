@@ -71,42 +71,6 @@ if ($code === '') {
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| Redirect URI
-|--------------------------------------------------------------------------
-|
-| Must be identical to the redirect_uri used
-| during the OAuth authorization request.
-|
-*/
-
-$redirectUri =
-    'https://natura-house.shop/api/whatsapp-connect.html';
-
-
-/*
-|--------------------------------------------------------------------------
-| Security: only allow our own redirect URI
-|--------------------------------------------------------------------------
-*/
-
-$allowedRedirectUri =
-    'https://natura-house.shop/api/whatsapp-connect.html';
-
-
-if ($redirectUri !== $allowedRedirectUri) {
-
-    http_response_code(400);
-
-    echo json_encode([
-        'success' => false,
-        'error' => 'Invalid redirect URI'
-    ]);
-
-    exit;
-}
-
 
 /*
 |--------------------------------------------------------------------------
@@ -170,9 +134,6 @@ $data = [
     'code' =>
         $code,
 
-    'redirect_uri' =>
-        $redirectUri,
-
     'grant_type' =>
         'authorization_code'
 ];
@@ -196,12 +157,7 @@ curl_setopt_array(
             true,
 
         CURLOPT_POSTFIELDS =>
-            json_encode($data),
-
-        CURLOPT_HTTPHEADER =>
-            [
-                'Content-Type: application/json'
-            ],
+            http_build_query($data),
 
         CURLOPT_RETURNTRANSFER =>
             true,
