@@ -29,23 +29,17 @@
         const status =
             document.getElementById("status");
 
-        window.addEventListener("DOMContentLoaded", () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get("code");
-            const error = urlParams.get("error");
-            
-            if (error) {
-                status.textContent = "Proses dibatalkan atau terjadi kesalahan: " + error;
-                button.disabled = false;
-            } else if (code) {
-                // Hapus code dari URL agar tidak terkirim ulang saat refresh
-                window.history.replaceState({}, document.title, window.location.pathname);
-                exchangeAuthorizationCode(code);
-            } else {
-                status.textContent = "Siap menghubungkan WhatsApp.";
-                button.disabled = false;
-            }
-        });
+        window.fbAsyncInit = function() {
+            FB.init({
+                appId            : APP_ID,
+                autoLogAppEvents : true,
+                cookie           : true,
+                xfbml            : true,
+                version          : 'v26.0'
+            });
+            status.textContent = "Siap menghubungkan WhatsApp.";
+            button.disabled = false;
+        };
 
 
         async function exchangeAuthorizationCode(code) {
@@ -108,30 +102,32 @@
 
                 button.disabled = false;
             }
-        }
+        const fbLoginCallback = (response) => {
+            if (response.authResponse && response.authResponse.code) {
+                const code = response.authResponse.code;
+                exchangeAuthorizationCode(code);
+            } else {
+                status.textContent = "Proses dibatalkan atau authorization code tidak diterima.";
+                button.disabled = false;
+            }
+        };
 
-
-        button.addEventListener("click", function () {
+        const launchWhatsAppSignup = () => {
             status.textContent = "Membuka proses koneksi WhatsApp...";
             button.disabled = true;
 
-            const redirectUri = "https://natura-house.shop/api/whatsapp-connect.html";
-            const extras = JSON.stringify({ featureType: "whatsapp_business_app_onboarding" });
+            FB.login(fbLoginCallback, {
+                config_id: CONFIG_ID,
+                response_type: 'code',
+                override_default_response_type: true,
+                extras: {"version":"v4"}
+            });
+        };
 
-            const oauthUrl = `https://www.facebook.com/v26.0/dialog/oauth?` +
-                `client_id=${APP_ID}` +
-                `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-                `&response_type=code` +
-                `&config_id=${CONFIG_ID}` +
-                `&extras=${encodeURIComponent(extras)}`;
-
-            window.location.href = oauthUrl;
-        });
+        button.addEventListener("click", launchWhatsAppSignup);
     </script>
 
-
-
-
-</body>
+    <!-- Facebook JavaScript SDK -->
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script></body>
 
 </html>

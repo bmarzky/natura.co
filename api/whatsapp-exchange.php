@@ -120,7 +120,7 @@ if (
 */
 
 $url =
-    'https://graph.facebook.com/v26.0/oauth/access_token';
+    'https://graph.facebook.com/v25.0/oauth/access_token';
 
 
 $data = [
@@ -135,7 +135,7 @@ $data = [
         $code,
 
     'redirect_uri' =>
-        'https://natura-house.shop/api/whatsapp-connect.html',
+        '',
 
     'grant_type' =>
         'authorization_code'
@@ -160,7 +160,12 @@ curl_setopt_array(
             true,
 
         CURLOPT_POSTFIELDS =>
-            http_build_query($data),
+            json_encode($data),
+
+        CURLOPT_HTTPHEADER =>
+            [
+                'Content-Type: application/json'
+            ],
 
         CURLOPT_RETURNTRANSFER =>
             true,
