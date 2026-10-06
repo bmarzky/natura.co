@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // FUNGSI UNTUK MENGIRIM PESAN
 // ==========================================
 function kirimBalasanWhatsApp($to, $text, $phoneNumberId, $accessToken) {
-    $url = "https://graph.facebook.com/v26.0/" . $phoneNumberId . "/messages";
+    $url = "https://graph.facebook.com/v20.0/" . $phoneNumberId . "/messages";
 
     $data = [
         'messaging_product' => 'whatsapp',
