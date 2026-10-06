@@ -11,7 +11,7 @@
 
     <h1>Hubungkan WhatsApp Natura House</h1>
 
-    <button id="connect-whatsapp" type="button">
+    <button id="connect-whatsapp" type="button" disabled>
         Hubungkan WhatsApp
     </button>
 
@@ -27,6 +27,7 @@
         const status = document.getElementById("status");
 
         window.fbAsyncInit = function () {
+
             FB.init({
                 appId: APP_ID,
                 cookie: true,
@@ -34,11 +35,67 @@
                 version: "v26.0"
             });
 
-            status.textContent = "Siap menghubungkan WhatsApp.";
+            status.textContent =
+                "Siap menghubungkan WhatsApp.";
+
             button.disabled = false;
         };
 
-        button.disabled = true;
+        async function exchangeAuthorizationCode(code) {
+
+            try {
+
+                status.textContent =
+                    "Authorization berhasil. Memproses koneksi...";
+
+                const response = await fetch(
+                    "/api/whatsapp-exchange.php",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            code: code
+                        })
+                    }
+                );
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+
+                    status.textContent =
+                        "Koneksi WhatsApp berhasil diproses.";
+
+                } else {
+
+                    console.error(
+                        "Token exchange failed:",
+                        result
+                    );
+
+                    status.textContent =
+                        "Gagal memproses koneksi WhatsApp.";
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Token exchange error:",
+                    error
+                );
+
+                status.textContent =
+                    "Terjadi kesalahan saat menghubungi server.";
+
+            } finally {
+
+                button.disabled = false;
+            }
+        }
 
         button.addEventListener("click", function () {
 
@@ -48,12 +105,13 @@
             button.disabled = true;
 
             FB.login(
-                async function (response) {
+                function (response) {
 
                     if (
                         !response.authResponse ||
                         !response.authResponse.code
                     ) {
+
                         status.textContent =
                             "Proses dibatalkan atau authorization code tidak diterima.";
 
@@ -61,53 +119,10 @@
                         return;
                     }
 
-                    status.textContent =
-                        "Authorization berhasil. Memproses koneksi...";
+                    const code =
+                        response.authResponse.code;
 
-                    const code = response.authResponse.code;
-
-                    try {
-
-                        const exchangeResponse = await fetch(
-                            "/api/whatsapp-exchange.php",
-                            {
-                                method: "POST",
-
-                                headers: {
-                                    "Content-Type": "application/json"
-                                },
-
-                                body: JSON.stringify({
-                                    code: code
-                                })
-                            }
-                        );
-
-                        const result = await exchangeResponse.json();
-
-                        if (
-                            exchangeResponse.ok &&
-                            result.success
-                        ) {
-
-                            status.textContent =
-                                "Koneksi WhatsApp berhasil diproses.";
-
-                        } else {
-
-                            status.textContent =
-                                "Gagal memproses koneksi WhatsApp.";
-                        }
-
-                    } catch (error) {
-
-                        status.textContent =
-                            "Terjadi kesalahan saat menghubungi server.";
-
-                    } finally {
-
-                        button.disabled = false;
-                    }
+                    exchangeAuthorizationCode(code);
 
                 },
                 {
