@@ -4,7 +4,7 @@
 // ==========================================
 
 // 1. Masukkan Access Token yang Anda dapatkan setelah klik "Generate token"
-$accessToken = 'EAAXSP4fgN0ABSoWPlOEiEzYLm7Cxz1kga4Xnme1OnccyK83SZCtjEi8YFgZAS65TczC12Y7nPZCrRwyZCnDj1GgdezciC9lXM1gRyy0rwSPa4wMlgDPb3tED6b9asjnmfbFUrkQZAMaoQdKrmZAk1z5N3c4mVFH2Kg8ddGZCu1on02J2FFwCbrn5MHF83vzvxFb4iUxVOWVtyGda2Lh2Kw0fnszZBzwDZBzqHZCLjzAzNN62Y1Sm1MKRVyIsD3ZAIwtKbnpr2m3gmJ2QyJSxmZAVr4nsjz6G';
+$accessToken = 'EAAXSP4fgN0ABSh7iFNRiURlDcUCC8A6lQ6zdZBZA4VkJpbeDFmb0tCU12bNdDMSNrdvNQdWXZAaRTx7VM8B3U2uVZCGRrkb33GRQKQEP4rDC0npPxxtMEzT52jphqH8ZBKjHP6NlZBtBaja4zcYGafQPbyJobbik5e48DZAIPHmCLz99bHXWsl99pJLjnmGAzNmZCGRZAivhllQoMpnNdvalMkv00oNHERQFRrH22yZCxaKnWfZCQoZCN8LfaRX2zokKGWOPCqRTRYgKen6TXJsRUWCJHQVp';
 
 // 2. Phone Number ID Anda (sudah saya masukkan berdasarkan foto)
 $phoneNumberId = '1394926080368074';
