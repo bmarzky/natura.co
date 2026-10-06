@@ -71,6 +71,14 @@ curl_close($ch);
 $result = json_decode($response, true);
 
 if ($httpCode < 200 || $httpCode >= 300) {
+
+    error_log(
+        'Meta token exchange failed. HTTP ' .
+        $httpCode .
+        '. Response: ' .
+        $response
+    );
+
     http_response_code(500);
 
     echo json_encode([
