@@ -82,21 +82,7 @@ if ($code === '') {
 */
 
 $redirectUri =
-    $input['redirect_uri']
-    ?? '';
-
-
-if ($redirectUri === '') {
-
-    http_response_code(400);
-
-    echo json_encode([
-        'success' => false,
-        'error' => 'Redirect URI is required'
-    ]);
-
-    exit;
-}
+    'https://natura-house.shop/api/whatsapp-connect.html';
 
 
 /*
