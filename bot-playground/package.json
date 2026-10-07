@@ -1,0 +1,15 @@
+{
+  "name": "natura-bot-playground",
+  "version": "1.0.0",
+  "description": "Playground for Natura AI Intent and Slot Filling",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.6",
+    "express": "^5.2.1",
+    "groq-sdk": "^1.6.0"
+  }
+}
