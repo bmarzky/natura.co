@@ -1,5 +1,5 @@
 # Konfigurasi rahasia
-js/config.js
+landing-page/js/config.js
 .env
 .env.*
 
@@ -14,3 +14,4 @@ api/webhook_log.txt
 # Node.js
 node_modules/
 bot-playground/node_modules/
+
