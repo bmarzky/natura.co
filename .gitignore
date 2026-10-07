@@ -10,3 +10,7 @@ Thumbs.db
 # Backend Secrets
 api/config.php
 api/webhook_log.txt
+
+# Node.js
+node_modules/
+bot-playground/node_modules/
