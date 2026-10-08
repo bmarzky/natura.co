@@ -11,8 +11,20 @@ const latestStates = {}; // Store latest state per phone for easier access
 
 async function processMessage(phone, text) {
   // Selalu tarik status pesanan terbaru dari Supabase untuk sinkronisasi antar-Worker
-  const pastOrder = await loadOrder(phone);
+  let pastOrder = await loadOrder(phone);
+
+  // LOGIKA REPEAT ORDER: Jika pesanan sebelumnya sudah lunas, kita anggap ini sesi pesanan baru
+  if (pastOrder && (pastOrder.payment_status === 'settlement' || pastOrder.payment_status === 'capture')) {
+      pastOrder = {}; // Kosongkan keranjang agar AI siap mencatat pesanan baru
+  }
+
   latestStates[phone] = Object.keys(pastOrder).length > 0 ? pastOrder : {};
+
+  // Berikan Order ID sejak awal chat agar memori keranjang tersimpan permanen di Supabase
+  if (!latestStates[phone].order_id) {
+      latestStates[phone].order_id = `ORDER-${Date.now()}`;
+      latestStates[phone].payment_status = 'draft';
+  }
 
   if (!chatHistories[phone]) {
     const pastHistory = await loadHistory(phone);
@@ -109,12 +121,9 @@ async function processMessage(phone, text) {
 
     // Inject Transfer Manual (Karena Midtrans sedang review)
     if (data.state && data.state.order_status === 'awaiting_payment' && !data.state.payment_link) {
-        const orderId = `ORDER-${Date.now()}`;
         const qty = data.state.quantity ? parseInt(data.state.quantity) : 1;
         const amount = 250000 * qty; 
-        const method = (data.state.payment_method || 'bca').toUpperCase();
         
-        data.state.order_id = orderId;
         data.state.payment_status = 'pending';
         data.state.payment_link = 'manual_transfer'; 
         
