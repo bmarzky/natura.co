@@ -4,7 +4,7 @@ Natura House adalah platform digital untuk pemesanan kue klasik. Repositori ini 
 
 ---
 
-## 📂 Struktur Proyek
+## Struktur Proyek
 
 - `/` (Root) : Landing page interaktif (HTML, CSS, JS) dengan UI dinamis berdasarkan waktu.
 - `/bot-playground` : Inti aplikasi Node.js (Express).
@@ -16,7 +16,7 @@ Natura House adalah platform digital untuk pemesanan kue klasik. Repositori ini 
 
 ---
 
-## 🚀 Fitur Utama & Arsitektur (Terbaru)
+## Fitur Utama & Arsitektur (Terbaru)
 
 ### 1. Kecerdasan Buatan (AI Bot) Berbasis Llama-3
 - **Natural Language Processing (NLP)**: Bot mampu mengekstraksi pesanan (produk, kuantitas, alamat, catatan kue) melalui percakapan alami menggunakan Groq (Llama-3).
@@ -34,7 +34,7 @@ Natura House adalah platform digital untuk pemesanan kue klasik. Repositori ini 
 
 ---
 
-## 🛠️ Panduan Konfigurasi Database (Supabase)
+## Panduan Konfigurasi Database (Supabase)
 
 Sistem ini membutuhkan Database PostgreSQL (Supabase) dengan skema berikut:
 
@@ -58,7 +58,7 @@ Sistem ini membutuhkan Database PostgreSQL (Supabase) dengan skema berikut:
 
 ---
 
-## 🛠️ Panduan Instalasi (Server cPanel)
+## Panduan Instalasi (Server cPanel)
 
 1. Clone repositori:
    ```bash
