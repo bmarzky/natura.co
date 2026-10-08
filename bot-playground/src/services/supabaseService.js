@@ -10,9 +10,21 @@ const { createClient } = require('@supabase/supabase-js');
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_KEY;
 
+// Mock Transport untuk menghindari error Realtime WebSocket di Node 20
+class DummyWebSocket {
+    constructor() {}
+    send() {}
+    close() {}
+    addEventListener() {}
+    removeEventListener() {}
+}
+
 // Pastikan kredensial ada agar tidak error saat pertama kali dijalankan tanpa .env
 const supabase = (supabaseUrl && supabaseKey) 
-    ? createClient(supabaseUrl, supabaseKey) 
+    ? createClient(supabaseUrl, supabaseKey, {
+        auth: { persistSession: false },
+        realtime: { transport: DummyWebSocket }
+    }) 
     : null;
 
 /**
