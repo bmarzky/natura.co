@@ -1,5 +1,6 @@
 const express = require('express');
 const { processMessage, unpauseBot, getBotStatus } = require('../services/aiService');
+const { markChatAsRead } = require('../services/supabaseService');
 
 const router = express.Router();
 
@@ -20,6 +21,11 @@ router.get('/status/:phone', async (req, res) => {
   const result = await getBotStatus(req.params.phone);
   console.log(`[API] Admin Dashboard merequest status untuk ${req.params.phone}. Hasil is_paused:`, result.is_paused);
   res.json(result);
+});
+
+router.post('/mark-read/:phone', async (req, res) => {
+  await markChatAsRead(req.params.phone);
+  res.json({ success: true });
 });
 
 module.exports = router;

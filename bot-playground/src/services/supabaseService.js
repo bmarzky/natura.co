@@ -58,7 +58,8 @@ async function upsertOrder(phone, state) {
             delivery_address: state.delivery_address || 'Pickup',
             cake_writing: state.cake_writing,
             payment_method: state.payment_method,
-            payment_status: state.payment_status || 'pending'
+            payment_status: state.payment_status || 'pending',
+            is_paused: state.is_paused || false
         };
 
         // Upsert: Masukkan baru atau timpa jika order_id sudah ada
@@ -121,7 +122,8 @@ async function loadOrder(phone) {
                 cake_writing: order.cake_writing,
                 payment_method: order.payment_method,
                 payment_status: order.payment_status,
-                order_status: order.payment_status === 'settlement' ? 'paid' : 'draft'
+                order_status: order.payment_status === 'settlement' ? 'paid' : 'draft',
+                is_paused: order.is_paused || false
             };
         }
         return {};
@@ -131,9 +133,19 @@ async function loadOrder(phone) {
     }
 }
 
+async function markChatAsRead(phone) {
+    if (!supabase) return;
+    try {
+        await supabase.from('bot_chats').update({ is_read: true }).eq('phone', phone).eq('role', 'user');
+    } catch (error) {
+        console.error('[Supabase] Error marking as read:', error.message);
+    }
+}
+
 module.exports = {
     logChatMessage,
     upsertOrder,
     loadHistory,
-    loadOrder
+    loadOrder,
+    markChatAsRead
 };

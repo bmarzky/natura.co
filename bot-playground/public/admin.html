@@ -106,11 +106,13 @@
 
         async function loadCustomers() {
             const listEl = document.getElementById('customer-list');
-            const { data, error } = await supabaseClient.from('bot_chats').select('phone, created_at').order('created_at', { ascending: false });
+            const { data, error } = await supabaseClient.from('bot_chats').select('phone, created_at, is_read, role').order('created_at', { ascending: false });
             if (error) return;
 
             const uniquePhones = [];
             const seen = new Set();
+            const unreadStatus = {}; // Menyimpan status unread dari pesan baru
+            
             for (let row of data) {
                 if (!seen.has(row.phone)) {
                     seen.add(row.phone);
@@ -119,29 +121,39 @@
                         created_at: row.created_at
                     });
                 }
+                if (row.role === 'user' && row.is_read === false) {
+                    unreadStatus[row.phone] = true;
+                }
             }
 
-            // Tarik status "is_paused" langsung dari server Node.js untuk setiap pelanggan
+            // Cek status is_paused dari order untuk tanda merah khusus "Human Handoff"
             await Promise.all(uniquePhones.map(async (u) => {
+                let isPaused = false;
                 try {
-                    const res = await fetch('/api/chat/status/' + u.phone + '?t=' + Date.now(), { cache: 'no-store' });
-                    const st = await res.json();
-                    u.is_unread = st.is_paused || false; // Jika AI Pause, berarti butuh Admin = UNREAD
-                } catch(e) {
-                    u.is_unread = false;
-                }
+                    const resOrder = await supabaseClient.from('bot_orders').select('is_paused').eq('phone', u.phone).order('created_at', { ascending: false }).limit(1);
+                    if (resOrder.data && resOrder.data.length > 0) isPaused = resOrder.data[0].is_paused;
+                } catch(e) {}
+                
+                u.is_paused = isPaused;
+                u.has_unread = unreadStatus[u.phone] || false;
             }));
 
             listEl.innerHTML = uniquePhones.map(u => {
                 const isSelected = currentPhone === u.phone ? 'selected-bg' : 'hover-bg';
                 const timeStr = new Date(u.created_at).toLocaleTimeString('id-ID', {hour12: false, hour: '2-digit', minute:'2-digit'});
-                const unreadMark = u.is_unread ? '<span class="w-2 h-2 rounded-full bg-red-500 inline-block mr-2 animate-pulse" title="Perlu Balasan"></span>' : '';
+                
+                let unreadMark = '';
+                if (u.is_paused) {
+                    unreadMark = '<span class="w-2 h-2 rounded-full bg-red-500 inline-block mr-2 animate-pulse" title="Perlu Bantuan Admin"></span>';
+                } else if (u.has_unread) {
+                    unreadMark = '<span class="w-2 h-2 rounded-full bg-blue-500 inline-block mr-2" title="Pesan Baru"></span>';
+                }
                 
                 return `
                     <div onclick="openChat('${u.phone}')" class="p-2 cursor-pointer rounded ${isSelected} text-xs flex justify-between items-center transition-colors">
                         <div class="flex items-center">
                             ${unreadMark}
-                            <span class="${u.is_unread ? 'text-gray-900 font-bold' : 'text-gray-600 font-semibold'}">${u.phone}</span>
+                            <span class="${(u.is_paused || u.has_unread) ? 'text-gray-900 font-bold' : 'text-gray-600 font-semibold'}">${u.phone}</span>
                         </div>
                         <span class="text-gray-500">${timeStr}</span>
                     </div>
@@ -154,6 +166,11 @@
             document.getElementById('active-phone-header').innerText = `Obrolan dengan: ${phone}`;
             document.getElementById('chat-input-area').classList.remove('hidden');
             document.getElementById('active-status').classList.remove('hidden');
+            
+            // Tandai pesan sebagai dibaca saat obrolan dibuka
+            try {
+                await fetch('/api/chat/mark-read/' + phone, { method: 'POST' });
+            } catch(e) {}
             
             loadCustomers();
             loadOrderDetails(phone);
@@ -214,12 +231,8 @@
             if (!error && data && data.length > 0) state = data[0];
             else detailBox.innerHTML = '<div class="text-gray-600">Pelanggan ini belum mulai memesan.</div>';
 
-            let is_paused = false;
-            try {
-                const res = await fetch('/api/chat/status/' + phone + '?t=' + Date.now(), { cache: 'no-store' });
-                const backendState = await res.json();
-                is_paused = backendState.is_paused || false;
-            } catch (e) {}
+            // Gunakan is_paused langsung dari Supabase Database (Paling Akurat)
+            const is_paused = state.is_paused || false;
             
             if (is_paused) {
                 statusIndicator.innerHTML = '<span class="text-[#f85149] blink">[ Butuh Bantuan Admin ]</span>';
@@ -240,7 +253,7 @@
                 ${formatVal('Order ID', state.order_id)}
                 ${formatVal('Produk', state.product)}
                 ${formatVal('Jumlah', state.quantity)}
-                ${formatVal('Total Harga', state.total ? `Rp ${state.total.toLocaleString('id-ID')}` : null)}
+                ${formatVal('Total Harga', state.total ? \`Rp \${state.total.toLocaleString('id-ID')}\` : null)}
                 ${formatVal('Tgl Kirim', state.delivery_date)}
                 ${formatVal('Jam Kirim', state.delivery_time)}
                 ${formatVal('Alamat', state.delivery_address)}
