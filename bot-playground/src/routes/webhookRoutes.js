@@ -32,7 +32,7 @@ router.post('/midtrans', async (req, res) => {
 // 1. Verifikasi Webhook dari Dashboard Meta
 router.get('/meta', (req, res) => {
     // Token rahasia buatan kita sendiri untuk mengamankan webhook
-    const VERIFY_TOKEN = process.env.META_VERIFY_TOKEN || "NATURA_RAHASIA_123";
+    const VERIFY_TOKEN = process.env.WA_VERIFY_TOKEN || "NATURA_RAHASIA_123";
 
     const mode = req.query['hub.mode'];
     const token = req.query['hub.verify_token'];

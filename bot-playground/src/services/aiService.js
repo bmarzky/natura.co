@@ -277,11 +277,11 @@ async function processChatMeta(phone, text) {
 }
 
 async function sendMetaWhatsAppMessage(phone, text) {
-    const META_TOKEN = process.env.META_ACCESS_TOKEN;
-    const PHONE_NUMBER_ID = process.env.META_PHONE_NUMBER_ID;
+    const META_TOKEN = process.env.WA_ACCESS_TOKEN;
+    const PHONE_NUMBER_ID = process.env.WA_PHONE_ID;
 
     if (!META_TOKEN || !PHONE_NUMBER_ID) {
-        console.warn("⚠️ META_ACCESS_TOKEN atau META_PHONE_NUMBER_ID belum diatur di Environment Variables. Pesan tidak dikirim ke WA.");
+        console.warn("⚠️ WA_ACCESS_TOKEN atau WA_PHONE_ID belum diatur di Environment Variables. Pesan tidak dikirim ke WA.");
         return;
     }
 
