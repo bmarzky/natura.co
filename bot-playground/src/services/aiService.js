@@ -10,19 +10,18 @@ const chatHistories = {};
 const latestStates = {}; // Store latest state per phone for easier access
 
 async function processMessage(phone, text) {
-  // Buat sesi baru jika belum ada (ANTI-AMNESIA: Tarik dari Supabase jika ada)
+  // Selalu tarik status pesanan terbaru dari Supabase untuk sinkronisasi antar-Worker
+  const pastOrder = await loadOrder(phone);
+  latestStates[phone] = Object.keys(pastOrder).length > 0 ? pastOrder : {};
+
   if (!chatHistories[phone]) {
     const pastHistory = await loadHistory(phone);
-    const pastOrder = await loadOrder(phone);
-    
     chatHistories[phone] = pastHistory.length > 0 ? pastHistory : [];
-    latestStates[phone] = Object.keys(pastOrder).length > 0 ? pastOrder : {};
   }
 
   // Jika AI sedang dibungkam (Human Handoff), jangan proses pesan dengan AI
-  if (latestStates[phone] && latestStates[phone].is_paused) {
+  if (latestStates[phone].is_paused) {
       console.log(`[Human Handoff] Pesan dari ${phone} diabaikan oleh AI karena sedang ditangani Admin.`);
-      // Dalam WhatsApp sungguhan, kita diam saja. Di Playground kita kirim feedback:
       return { reply: ["(Sedang menghubungkan ke Admin...)"], state: latestStates[phone] };
   }
 
@@ -257,9 +256,8 @@ async function getBotStatus(phone) {
 // ==========================================
 async function processChatMeta(phone, text) {
     try {
-        // 1. Dapatkan respons dari AI (format JSON String)
-        const botResponseStr = await processMessage(phone, text);
-        const data = JSON.parse(botResponseStr);
+        // 1. Dapatkan respons dari AI (sudah berbentuk object)
+        const data = await processMessage(phone, text);
 
         // 2. Kumpulkan semua balasan
         const replies = data.reply || [];
