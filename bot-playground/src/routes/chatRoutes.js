@@ -1,5 +1,5 @@
 const express = require('express');
-const { processMessage, unpauseBot, getBotStatus } = require('../services/aiService');
+const { processMessage, unpauseBot, getBotStatus, sendMetaWhatsAppMessage } = require('../services/aiService');
 const { markChatAsRead } = require('../services/supabaseService');
 
 const router = express.Router();
@@ -25,6 +25,13 @@ router.get('/status/:phone', async (req, res) => {
 
 router.post('/mark-read/:phone', async (req, res) => {
   await markChatAsRead(req.params.phone);
+  res.json({ success: true });
+});
+
+router.post('/send-admin', async (req, res) => {
+  const { phone, text } = req.body;
+  if (!phone || !text) return res.status(400).json({ error: "Phone and text required" });
+  await sendMetaWhatsAppMessage(phone, text);
   res.json({ success: true });
 });
 

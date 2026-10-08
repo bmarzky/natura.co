@@ -317,4 +317,4 @@ async function sendMetaWhatsAppMessage(phone, text) {
     }
 }
 
-module.exports = { processMessage, handleWebhookNotification, unpauseBot, getBotStatus, processChatMeta };
+module.exports = { processMessage, handleWebhookNotification, unpauseBot, getBotStatus, processChatMeta, sendMetaWhatsAppMessage };

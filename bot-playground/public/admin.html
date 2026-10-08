@@ -172,7 +172,7 @@
             
             // Tandai pesan sebagai dibaca saat obrolan dibuka
             try {
-                await fetch('/api/chat/mark-read/' + phone, { method: 'POST' });
+                await fetch('/bot/api/chat/mark-read/' + phone, { method: 'POST' });
             } catch(e) {}
             
             loadCustomers();
@@ -273,7 +273,19 @@
             
             inputEl.value = ''; 
             
+            // Simpan ke database Supabase
             await supabaseClient.from('bot_chats').insert({ phone: currentPhone, role: 'assistant', content: text });
+            
+            // Kirim ke WhatsApp via Node.js Backend
+            try {
+                await fetch('/bot/api/chat/send-admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: currentPhone, text: text })
+                });
+            } catch (e) {
+                console.error("Gagal mengirim pesan ke backend:", e);
+            }
             
             // Render local optimism as admin
             const boxEl = document.getElementById('chat-box');
@@ -295,7 +307,7 @@
         async function unpauseBot() {
             if (!currentPhone) return;
             try {
-                const res = await fetch('/api/chat/unpause', {
+                const res = await fetch('/bot/api/chat/unpause', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ phone: currentPhone })
