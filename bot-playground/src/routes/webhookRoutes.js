@@ -25,4 +25,59 @@ router.post('/midtrans', async (req, res) => {
     }
 });
 
+// ============================================
+// META WHATSAPP CLOUD API WEBHOOK (RESMI)
+// ============================================
+
+// 1. Verifikasi Webhook dari Dashboard Meta
+router.get('/meta', (req, res) => {
+    // Token rahasia buatan kita sendiri untuk mengamankan webhook
+    const VERIFY_TOKEN = process.env.META_VERIFY_TOKEN || "NATURA_RAHASIA_123";
+
+    const mode = req.query['hub.mode'];
+    const token = req.query['hub.verify_token'];
+    const challenge = req.query['hub.challenge'];
+
+    if (mode && token) {
+        if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+            console.log('[Meta Webhook] Berhasil diverifikasi oleh Facebook!');
+            return res.status(200).send(challenge);
+        } else {
+            return res.status(403).send('Gagal verifikasi token');
+        }
+    }
+    res.status(400).send('Format permintaan salah');
+});
+
+// 2. Menerima Pesan Masuk dari WhatsApp
+const aiService = require('../services/aiService');
+
+router.post('/meta', async (req, res) => {
+    const body = req.body;
+
+    if (body.object === 'whatsapp_business_account') {
+        if (body.entry && body.entry[0].changes && body.entry[0].changes[0].value.messages && body.entry[0].changes[0].value.messages[0]) {
+            const message = body.entry[0].changes[0].value.messages[0];
+            const phone = message.from; // Nomor pengirim
+            let text = "";
+
+            if (message.type === 'text') {
+                text = message.text.body;
+            } else if (message.type === 'image') {
+                text = "[Mengirim Gambar/Foto]";
+            }
+
+            console.log(`[WhatsApp API Masuk] Dari: ${phone} | Pesan: ${text}`);
+
+            if (text) {
+                // Jangan ditunggu (await) agar server segera membalas 200 OK ke Meta (Syarat Meta)
+                aiService.processChatMeta(phone, text).catch(e => console.log('Gagal balas meta:', e));
+            }
+        }
+        res.status(200).send('EVENT_RECEIVED');
+    } else {
+        res.sendStatus(404);
+    }
+});
+
 module.exports = router;

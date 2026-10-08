@@ -252,4 +252,71 @@ async function getBotStatus(phone) {
     return latestStates[phone];
 }
 
-module.exports = { processMessage, handleWebhookNotification, unpauseBot, getBotStatus };
+// ==========================================
+// FUNGSI KHUSUS UNTUK META WHATSAPP CLOUD
+// ==========================================
+async function processChatMeta(phone, text) {
+    try {
+        // 1. Dapatkan respons dari AI (format JSON String)
+        const botResponseStr = await processMessage(phone, text);
+        const data = JSON.parse(botResponseStr);
+
+        // 2. Kumpulkan semua balasan
+        const replies = data.reply || [];
+
+        // 3. Kirim satu per satu kembali ke WhatsApp Meta API
+        for (const replyText of replies) {
+            await sendMetaWhatsAppMessage(phone, replyText);
+            // Jeda 500ms agar pesan tidak bertabrakan urutannya
+            await new Promise(resolve => setTimeout(resolve, 500));
+        }
+
+    } catch (e) {
+        console.error("Gagal memproses pesan Meta:", e);
+    }
+}
+
+async function sendMetaWhatsAppMessage(phone, text) {
+    const META_TOKEN = process.env.META_ACCESS_TOKEN;
+    const PHONE_NUMBER_ID = process.env.META_PHONE_NUMBER_ID;
+
+    if (!META_TOKEN || !PHONE_NUMBER_ID) {
+        console.warn("⚠️ META_ACCESS_TOKEN atau META_PHONE_NUMBER_ID belum diatur di Environment Variables. Pesan tidak dikirim ke WA.");
+        return;
+    }
+
+    try {
+        const url = `https://graph.facebook.com/v19.0/${PHONE_NUMBER_ID}/messages`;
+        
+        const payload = {
+            messaging_product: "whatsapp",
+            recipient_type: "individual",
+            to: phone, // Meta API memakai format 628xxx tanpa tanda +
+            type: "text",
+            text: {
+                preview_url: false,
+                body: text
+            }
+        };
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${META_TOKEN}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        if (result.error) {
+            console.error("❌ Gagal mengirim pesan ke WhatsApp Meta:", result.error.message);
+        } else {
+            console.log(`✅ Pesan terkirim ke WhatsApp ${phone}`);
+        }
+    } catch (e) {
+        console.error("❌ Network error saat mengirim ke WhatsApp Meta:", e.message);
+    }
+}
+
+module.exports = { processMessage, handleWebhookNotification, unpauseBot, getBotStatus, processChatMeta };
