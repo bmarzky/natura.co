@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Natura Terminal - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'JetBrains Mono', monospace; background-color: #f9fafb; color: #1f2937; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #f3f4f6; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        
+        .box-border { border: 1px solid #e5e7eb; background: #ffffff; }
+        .hover-bg:hover { background: #f3f4f6; }
+        .selected-bg { background: #eff6ff; border-left: 3px solid #3b82f6; }
+        
+        .text-glow-green { color: #10b981; font-weight: bold; }
+        .text-glow-red { color: #ef4444; font-weight: bold; }
+        .blink { animation: blink-animation 1s steps(2, start) infinite; }
+        @keyframes blink-animation { to { visibility: hidden; } }
+    </style>
+</head>
+<body class="h-screen overflow-hidden flex flex-col p-4 gap-4">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between box-border p-3 rounded-md shadow-sm">
+        <div class="flex items-center gap-3">
+            <span class="text-sm text-gray-800 font-bold uppercase tracking-wide">Admin Panel Natura</span>
+        </div>
+        <div id="system-clock" class="text-xs text-gray-500">00:00:00</div>
+    </div>
+
+    <div class="flex-1 flex gap-4 h-full overflow-hidden">
+        
+        <!-- 1. LEFT: INBOX -->
+        <div class="w-1/4 box-border rounded-md flex flex-col shadow-sm">
+            <div class="p-3 border-b border-gray-200 text-xs font-bold text-blue-600">
+                Daftar Pelanggan
+            </div>
+            <div id="customer-list" class="flex-1 overflow-y-auto p-2 space-y-1">
+                <div class="text-xs text-gray-500 animate-pulse">Memuat data...</div>
+            </div>
+        </div>
+
+        <!-- 2. MAIN: TERMINAL CHAT -->
+        <div class="flex-1 box-border rounded-md flex flex-col shadow-sm relative">
+            <div class="p-3 border-b border-gray-200 flex justify-between items-center bg-gray-50 rounded-t-md">
+                <div class="text-xs font-bold text-blue-600" id="active-phone-header">
+                    Pilih Pelanggan
+                </div>
+                <div class="flex items-center gap-3">
+                    <span id="active-status" class="text-xs text-gray-500 hidden">[ AI Sedang Aktif ]</span>
+                    <button onclick="unpauseBot()" id="btn-unpause" class="hidden text-xs bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded transition-colors shadow-sm">
+                        Aktifkan AI Kembali
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat Area -->
+            <div id="chat-box" class="flex-1 overflow-y-auto p-4 space-y-3 text-sm bg-white">
+                <div class="h-full flex items-center justify-center text-gray-400">
+                    Silakan pilih pelanggan di sebelah kiri.
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div id="chat-input-area" class="p-3 border-t border-gray-200 hidden bg-gray-50 rounded-b-md">
+                <div class="flex items-center gap-2">
+                    <input type="text" id="message-input" autocomplete="off" class="flex-1 bg-white px-3 py-2 border border-gray-300 rounded shadow-sm outline-none focus:border-blue-500 text-gray-800 font-mono text-sm" placeholder="Ketik balasan Anda di sini...">
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. RIGHT: ORDER DETAILS -->
+        <div class="w-1/4 box-border rounded-md flex flex-col shadow-sm">
+            <div class="p-3 border-b border-gray-200 text-xs font-bold text-blue-600">
+                Detail Pesanan
+            </div>
+            <div id="order-details-box" class="flex-1 overflow-y-auto p-4 text-xs bg-white">
+                <div class="text-gray-400">Belum ada pelanggan yang dipilih.</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Proteksi
+        if (window.location.protocol === 'file:') {
+            alert("⚠️ PERHATIAN: Jangan membuka file ini langsung dari folder!\nSistem akan mengalihkan Anda ke server lokal yang benar (http://localhost:3000/admin.html).");
+            window.location.href = "http://localhost:3000/admin.html";
+        }
+
+        // Clock
+        setInterval(() => document.getElementById('system-clock').innerText = new Date().toLocaleTimeString('id-ID', { hour12: false }), 1000);
+
+        // KREDENSIAL SUPABASE
+        const SUPABASE_URL = "https://loorhxkfmhdljqxollzh.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxvb3JoeGtmbWhkbGpxeG9sbHpoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MDYxNzIzMSwiZXhwIjoyMTA2MTkzMjMxfQ.xYgLFgcfLi8bT-4uP73mw_CFpNHZfjsG05HlsxEwroU";
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        let currentPhone = null;
+
+        async function loadCustomers() {
+            const listEl = document.getElementById('customer-list');
+            const { data, error } = await supabaseClient.from('bot_chats').select('phone, created_at').order('created_at', { ascending: false });
+            if (error) return;
+
+            const uniquePhones = [];
+            const seen = new Set();
+            for (let row of data) {
+                if (!seen.has(row.phone)) {
+                    seen.add(row.phone);
+                    uniquePhones.push({
+                        phone: row.phone,
+                        created_at: row.created_at
+                    });
+                }
+            }
+
+            // Tarik status "is_paused" langsung dari server Node.js untuk setiap pelanggan
+            await Promise.all(uniquePhones.map(async (u) => {
+                try {
+                    const res = await fetch('/api/chat/status/' + u.phone + '?t=' + Date.now(), { cache: 'no-store' });
+                    const st = await res.json();
+                    u.is_unread = st.is_paused || false; // Jika AI Pause, berarti butuh Admin = UNREAD
+                } catch(e) {
+                    u.is_unread = false;
+                }
+            }));
+
+            listEl.innerHTML = uniquePhones.map(u => {
+                const isSelected = currentPhone === u.phone ? 'selected-bg' : 'hover-bg';
+                const timeStr = new Date(u.created_at).toLocaleTimeString('id-ID', {hour12: false, hour: '2-digit', minute:'2-digit'});
+                const unreadMark = u.is_unread ? '<span class="w-2 h-2 rounded-full bg-red-500 inline-block mr-2 animate-pulse" title="Perlu Balasan"></span>' : '';
+                
+                return `
+                    <div onclick="openChat('${u.phone}')" class="p-2 cursor-pointer rounded ${isSelected} text-xs flex justify-between items-center transition-colors">
+                        <div class="flex items-center">
+                            ${unreadMark}
+                            <span class="${u.is_unread ? 'text-gray-900 font-bold' : 'text-gray-600 font-semibold'}">${u.phone}</span>
+                        </div>
+                        <span class="text-gray-500">${timeStr}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function openChat(phone) {
+            currentPhone = phone;
+            document.getElementById('active-phone-header').innerText = `Obrolan dengan: ${phone}`;
+            document.getElementById('chat-input-area').classList.remove('hidden');
+            document.getElementById('active-status').classList.remove('hidden');
+            
+            loadCustomers();
+            loadOrderDetails(phone);
+
+            const boxEl = document.getElementById('chat-box');
+            boxEl.innerHTML = '<div class="text-gray-600">Memuat riwayat pesan...</div>';
+
+            const { data, error } = await supabaseClient.from('bot_chats').select('*').eq('phone', phone).order('created_at', { ascending: true });
+            if (error) return;
+
+            boxEl.innerHTML = '';
+            data.forEach(msg => appendBubble(msg));
+            scrollToBottom();
+        }
+
+        function appendBubble(msg) {
+            const boxEl = document.getElementById('chat-box');
+            let text = msg.content;
+            try {
+                const parsed = JSON.parse(text);
+                if (parsed.reply) text = Array.isArray(parsed.reply) ? parsed.reply.join("\n\n") : parsed.reply;
+            } catch (e) {}
+
+            const isUser = msg.role === 'user';
+            const timeStr = new Date(msg.created_at).toLocaleTimeString('id-ID', {hour12: false});
+            
+            const div = document.createElement('div');
+            div.className = "mb-2";
+            
+            if (isUser) {
+                div.innerHTML = `
+                    <div class="text-gray-500 text-[10px] mb-1">[${timeStr}] <span class="text-blue-600 font-bold">Pelanggan (${currentPhone})</span></div>
+                    <div class="pl-4 border-l-2 border-gray-300 text-gray-800">${text.replace(/\n/g, '<br>')}</div>
+                `;
+            } else {
+                div.innerHTML = `
+                    <div class="text-gray-500 text-[10px] mb-1">[${timeStr}] <span class="text-green-600 font-bold">Bot / Admin Natura</span></div>
+                    <div class="pl-4 border-l-2 border-green-400 text-gray-700">${text.replace(/\n/g, '<br>')}</div>
+                `;
+            }
+
+            boxEl.appendChild(div);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            const boxEl = document.getElementById('chat-box');
+            boxEl.scrollTop = boxEl.scrollHeight;
+        }
+
+        async function loadOrderDetails(phone) {
+            const detailBox = document.getElementById('order-details-box');
+            const statusIndicator = document.getElementById('active-status');
+            const btnUnpause = document.getElementById('btn-unpause');
+            
+            let state = {};
+            const { data, error } = await supabaseClient.from('bot_orders').select('*').eq('phone', phone).order('created_at', { ascending: false }).limit(1);
+            if (!error && data && data.length > 0) state = data[0];
+            else detailBox.innerHTML = '<div class="text-gray-600">Pelanggan ini belum mulai memesan.</div>';
+
+            let is_paused = false;
+            try {
+                const res = await fetch('/api/chat/status/' + phone + '?t=' + Date.now(), { cache: 'no-store' });
+                const backendState = await res.json();
+                is_paused = backendState.is_paused || false;
+            } catch (e) {}
+            
+            if (is_paused) {
+                statusIndicator.innerHTML = '<span class="text-[#f85149] blink">[ Butuh Bantuan Admin ]</span>';
+                btnUnpause.classList.remove('hidden');
+            } else {
+                statusIndicator.innerHTML = '<span class="text-[#56d364] terminal-glow">[ AI Sedang Aktif ]</span>';
+                btnUnpause.classList.add('hidden');
+            }
+
+            if (Object.keys(state).length === 0) return;
+
+            const formatVal = (key, val) => {
+                const v = val ? `<span class="text-gray-800 font-bold">${val}</span>` : `<span class="text-gray-400 italic">kosong</span>`;
+                return `<div class="mb-1 border-b border-gray-100 pb-1"><span class="text-gray-500 w-24 inline-block">${key}</span>: ${v}</div>`;
+            };
+            
+            detailBox.innerHTML = `
+                ${formatVal('Order ID', state.order_id)}
+                ${formatVal('Produk', state.product)}
+                ${formatVal('Jumlah', state.quantity)}
+                ${formatVal('Total Harga', state.total ? `Rp ${state.total.toLocaleString('id-ID')}` : null)}
+                ${formatVal('Tgl Kirim', state.delivery_date)}
+                ${formatVal('Jam Kirim', state.delivery_time)}
+                ${formatVal('Alamat', state.delivery_address)}
+                ${formatVal('Pembayaran', state.payment_method?.toUpperCase())}
+                ${formatVal('Status Bayar', state.payment_status)}
+            `;
+        }
+
+        async function sendMessage() {
+            if (!currentPhone) return;
+            const inputEl = document.getElementById('message-input');
+            const text = inputEl.value.trim();
+            if (!text) return;
+            
+            inputEl.value = ''; 
+            
+            await supabaseClient.from('bot_chats').insert({ phone: currentPhone, role: 'assistant', content: text });
+            
+            // Render local optimism as admin
+            const boxEl = document.getElementById('chat-box');
+            const div = document.createElement('div');
+            div.className = "mb-2";
+            const timeStr = new Date().toLocaleTimeString('id-ID', {hour12: false});
+            div.innerHTML = `
+                <div class="text-gray-500 text-[10px] mb-1">[${timeStr}] <span class="text-purple-600 font-bold">Bot / Admin Natura</span></div>
+                <div class="pl-4 border-l-2 border-purple-400 text-gray-800">${text.replace(/\n/g, '<br>')}</div>
+            `;
+            boxEl.appendChild(div);
+            scrollToBottom();
+        }
+
+        document.getElementById('message-input').addEventListener('keypress', e => {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+        });
+
+        async function unpauseBot() {
+            if (!currentPhone) return;
+            try {
+                const res = await fetch('/api/chat/unpause', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: currentPhone })
+                });
+                const data = await res.json();
+                if (data.success) loadOrderDetails(currentPhone);
+            } catch (err) {
+                alert("ERR_CONNECTION_REFUSED");
+            }
+        }
+
+        supabaseClient
+            .channel('public:bot_chats')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bot_chats' }, payload => {
+                const newMsg = payload.new;
+                // Jangan tambah bubble jika asalnya dari admin itu sendiri
+                if (currentPhone && newMsg.phone === currentPhone && newMsg.role !== 'assistant') {
+                    appendBubble(newMsg);
+                    loadOrderDetails(currentPhone);
+                }
+                loadCustomers();
+            })
+            .subscribe();
+
+        loadCustomers();
+    </script>
+</body>
+</html>

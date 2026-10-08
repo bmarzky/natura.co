@@ -101,46 +101,28 @@ async function processMessage(phone, text) {
     const botResponse = completion.choices[0].message.content;
     const data = JSON.parse(botResponse);
 
-    // Inject Midtrans if needed
+    // [ANTI-AMNESIA FIELDS] AI tidak mengeluarkan order_id dan payment_link, jadi kita kembalikan dari memori.
+    if (data.state && latestStates[phone]) {
+        if (!data.state.order_id && latestStates[phone].order_id) data.state.order_id = latestStates[phone].order_id;
+        if (!data.state.payment_link && latestStates[phone].payment_link) data.state.payment_link = latestStates[phone].payment_link;
+        if (latestStates[phone].is_paused !== undefined) data.state.is_paused = latestStates[phone].is_paused;
+    }
+
+    // Inject Transfer Manual (Karena Midtrans sedang review)
     if (data.state && data.state.order_status === 'awaiting_payment' && !data.state.payment_link) {
         const orderId = `ORDER-${Date.now()}`;
         const qty = data.state.quantity ? parseInt(data.state.quantity) : 1;
         const amount = 250000 * qty; 
-        const customerDetails = {
-            first_name: data.state.customer_name || 'Customer',
-            phone: phone
-        };
-        const method = data.state.payment_method || 'bca';
+        const method = (data.state.payment_method || 'bca').toUpperCase();
         
-        try {
-            const chargeResponse = await chargeTransaction(orderId, amount, customerDetails, method);
-            
-            data.state.order_id = orderId;
-            data.state.payment_status = 'pending';
-            data.state.payment_link = 'generated_via_core_api'; // just to mark it as generated
-            
-            let paymentInstruction = '';
-            
-            if (chargeResponse.payment_type === 'bank_transfer' && chargeResponse.va_numbers && chargeResponse.va_numbers.length > 0) {
-                const vaInfo = chargeResponse.va_numbers[0];
-                paymentInstruction = `Silakan transfer ke Virtual Account ${vaInfo.bank.toUpperCase()} berikut:\n\n*${vaInfo.va_number}*\nAtas Nama: Natura House\nNominal: Rp${amount.toLocaleString('id-ID')}\n\nKabari kami kalau sudah transfer ya kak!`;
-            } else if (chargeResponse.payment_type === 'echannel' && chargeResponse.biller_code) {
-                paymentInstruction = `Silakan transfer via Mandiri Bill Payment:\n\nCompany Code: *${chargeResponse.biller_code}*\nBill Key: *${chargeResponse.bill_key}*\nNominal: Rp${amount.toLocaleString('id-ID')}\n\nKabari kami kalau sudah transfer ya kak!`;
-            } else if (chargeResponse.payment_type === 'qris' || chargeResponse.payment_type === 'gopay') {
-                const qrUrl = chargeResponse.actions && chargeResponse.actions.find(a => a.name === 'generate-qr-code' || a.name === 'generate-qr-code');
-                if (qrUrl) {
-                     paymentInstruction = `Silakan scan QR code pada link berikut atau buka URL ini untuk membayar via ${method.toUpperCase()}:\n${qrUrl.url}\n\nKabari kami kalau sudah bayar ya kak!`;
-                } else {
-                     paymentInstruction = `Pesanan ${method.toUpperCase()} berhasil dibuat. Silakan selesaikan pembayaran di aplikasi Anda.\n\nKabari kami kalau sudah bayar ya kak!`;
-                }
-            } else {
-                paymentInstruction = `Instruksi pembayaran untuk ${method.toUpperCase()} telah disiapkan. Silakan cek aplikasi/email Anda untuk detail lebih lanjut.\n\nKabari kami kalau sudah bayar ya kak!`;
-            }
-            
-            data.reply.push(paymentInstruction);
-        } catch (err) {
-            data.reply.push("Maaf kak, ada sedikit gangguan saat membuat instruksi pembayaran. Mohon tunggu sebentar ya.");
-        }
+        data.state.order_id = orderId;
+        data.state.payment_status = 'pending';
+        data.state.payment_link = 'manual_transfer'; 
+        
+        const paymentInstruction = `Silakan transfer ke Rekening Pribadi BSI berikut:\n\n*7250265039*\nAtas Nama: BIMA RIZKI\nNominal: Rp${amount.toLocaleString('id-ID')}\n\nJika sudah transfer, mohon informasikan di sini agar admin kami bisa mengecek mutasinya ya kak!`;
+        
+        if (!data.reply) data.reply = [];
+        data.reply.push(paymentInstruction);
     }
 
     // Update latest state
@@ -201,7 +183,7 @@ async function processMessage(phone, text) {
     
     // Simpan order state yang paling baru ke Supabase jika order_id sudah terbuat
     if (data.state && data.state.order_id) {
-        await upsertOrder(data.state);
+        await upsertOrder(phone, data.state);
     }
 
     return data;
@@ -248,4 +230,26 @@ async function handleWebhookNotification(orderId, transactionStatus) {
     return true;
 }
 
-module.exports = { processMessage, handleWebhookNotification };
+// Fungsi untuk mengaktifkan kembali bot dari mode Human Handoff
+async function unpauseBot(phone) {
+    if (!latestStates[phone]) {
+        const pastOrder = await loadOrder(phone);
+        latestStates[phone] = Object.keys(pastOrder).length > 0 ? pastOrder : {};
+    }
+
+    latestStates[phone].is_paused = false;
+    if (latestStates[phone].order_id) {
+        await upsertOrder(phone, latestStates[phone]); // Benar
+    }
+    return { success: true, message: `Bot untuk nomor ${phone} telah diaktifkan kembali.` };
+}
+
+async function getBotStatus(phone) {
+    if (!latestStates[phone]) {
+        const pastOrder = await loadOrder(phone);
+        latestStates[phone] = Object.keys(pastOrder).length > 0 ? pastOrder : {};
+    }
+    return latestStates[phone];
+}
+
+module.exports = { processMessage, handleWebhookNotification, unpauseBot, getBotStatus };

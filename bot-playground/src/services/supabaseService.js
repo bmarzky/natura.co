@@ -26,12 +26,12 @@ async function logChatMessage(phone, role, content) {
 /**
  * Menyimpan atau memperbarui data pesanan
  */
-async function upsertOrder(state) {
+async function upsertOrder(phone, state) {
     if (!supabase || !state.order_id) return;
     try {
         const orderData = {
             order_id: state.order_id,
-            phone: state.customer_phone || 'unknown',
+            phone: phone,
             product: state.product || 'Unknown',
             quantity: parseInt(state.quantity) || 1,
             total: parseInt(state.total) || 0,
