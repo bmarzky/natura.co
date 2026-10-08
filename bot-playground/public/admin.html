@@ -107,7 +107,10 @@
         async function loadCustomers() {
             const listEl = document.getElementById('customer-list');
             const { data, error } = await supabaseClient.from('bot_chats').select('phone, created_at, is_read, role').order('created_at', { ascending: false });
-            if (error) return;
+            if (error) {
+                listEl.innerHTML = `<div class="text-red-500 p-2 text-xs">Error Database: ${error.message}. <br><br>Pastikan Anda menambahkan kolom 'is_read' di tabel 'bot_chats', bukan di tabel lain!</div>`;
+                return;
+            }
 
             const uniquePhones = [];
             const seen = new Set();
