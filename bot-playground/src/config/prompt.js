@@ -69,7 +69,8 @@ Anda WAJIB membalas dengan format JSON yang ketat berikut ini:
     "delivery_time": "waktu atau null",
     "total": "total harga (qty * 250000) atau null",
     "order_status": "draft"
-  }
+  },
+  "complaint_summary": "rangkuman masalah secara ringkas dan jelas (isi HANYA JIKA pelanggan melakukan komplain/meminta bantuan admin) atau null"
 }
 
 PENTING UNTUK STATE: State ini adalah memori percakapan. Setiap user memberi info baru, perbarui state ini. Jika user memberi beberapa notes/tulisan, gabungkan teksnya jangan ditimpa.`;

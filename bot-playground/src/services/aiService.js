@@ -157,6 +157,9 @@ async function processMessage(phone, text) {
         latestStates[phone].is_paused = true;
         data.state.is_paused = true;
         
+        const summary = data.complaint_summary || "Pelanggan meminta bantuan manual.";
+        const orderIdText = data.state.order_id ? `\nID: ${data.state.order_id}` : "";
+
         // Mengeksekusi pengiriman WA sungguhan ke HP Admin jika token tersedia di .env
         if (process.env.WA_ACCESS_TOKEN && process.env.WA_PHONE_ID && process.env.ADMIN_PHONE) {
             fetch(`https://graph.facebook.com/v20.0/${process.env.WA_PHONE_ID}/messages`, {
@@ -170,7 +173,7 @@ async function processMessage(phone, text) {
                     recipient_type: 'individual',
                     to: process.env.ADMIN_PHONE,
                     type: 'text',
-                    text: { body: `🚨 *BOS NATURA HOUSE!* 🚨\n\nPelanggan di nomor ${phone} baru saja mengajukan komplain atau butuh bantuan manusia.\n\nAI sekarang sedang di-*Mute* (Dibungkam). Silakan buka Dashboard/WA Bot untuk membalas secara manual!` }
+                    text: { body: `Ada komplain masuk dari:\nNo: ${phone}${orderIdText}\nMasalah: ${summary}` }
                 })
             }).then(async (res) => {
                 const responseJson = await res.json();
