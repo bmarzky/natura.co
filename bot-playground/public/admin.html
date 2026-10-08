@@ -256,7 +256,7 @@
                 ${formatVal('Order ID', state.order_id)}
                 ${formatVal('Produk', state.product)}
                 ${formatVal('Jumlah', state.quantity)}
-                ${formatVal('Total Harga', state.total ? \`Rp \${state.total.toLocaleString('id-ID')}\` : null)}
+                ${formatVal('Total Harga', state.total ? `Rp ${state.total.toLocaleString('id-ID')}` : null)}
                 ${formatVal('Tgl Kirim', state.delivery_date)}
                 ${formatVal('Jam Kirim', state.delivery_time)}
                 ${formatVal('Alamat', state.delivery_address)}
