@@ -1,0 +1,121 @@
+const { createClient } = require('@supabase/supabase-js');
+
+// Mengambil kredensial dari .env
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
+
+// Pastikan kredensial ada agar tidak error saat pertama kali dijalankan tanpa .env
+const supabase = (supabaseUrl && supabaseKey) 
+    ? createClient(supabaseUrl, supabaseKey) 
+    : null;
+
+/**
+ * Menyimpan pesan chat mentah ke database (Sangat berguna untuk RAG/Training Data)
+ */
+async function logChatMessage(phone, role, content) {
+    if (!supabase) return;
+    try {
+        await supabase.from('bot_chats').insert([
+            { phone, role, content }
+        ]);
+    } catch (error) {
+        console.error('[Supabase] Error logging chat:', error.message);
+    }
+}
+
+/**
+ * Menyimpan atau memperbarui data pesanan
+ */
+async function upsertOrder(state) {
+    if (!supabase || !state.order_id) return;
+    try {
+        const orderData = {
+            order_id: state.order_id,
+            phone: state.customer_phone || 'unknown',
+            product: state.product || 'Unknown',
+            quantity: parseInt(state.quantity) || 1,
+            total: parseInt(state.total) || 0,
+            delivery_date: state.delivery_date,
+            delivery_time: state.delivery_time,
+            delivery_address: state.delivery_address || 'Pickup',
+            cake_writing: state.cake_writing,
+            payment_method: state.payment_method,
+            payment_status: state.payment_status || 'pending'
+        };
+
+        // Upsert: Masukkan baru atau timpa jika order_id sudah ada
+        const { error } = await supabase.from('bot_orders').upsert(orderData, { onConflict: 'order_id' });
+        if (error) throw error;
+        
+    } catch (error) {
+        console.error('[Supabase] Error upserting order:', error.message);
+    }
+}
+
+/**
+ * Mengambil memori chat sebelumnya agar AI tidak amnesia setelah restart server
+ */
+async function loadHistory(phone) {
+    if (!supabase) return [];
+    try {
+        const { data, error } = await supabase
+            .from('bot_chats')
+            .select('role, content')
+            .eq('phone', phone)
+            .order('created_at', { ascending: true })
+            .limit(30); // Ambil 30 pesan terakhir agar konteks tidak terlalu berat
+            
+        if (error) throw error;
+        return data || [];
+    } catch (error) {
+        console.error('[Supabase] Error loading history:', error.message);
+        return [];
+    }
+}
+
+/**
+ * Mengambil status pesanan terakhir agar AI ingat sampai di tahap mana
+ */
+async function loadOrder(phone) {
+    if (!supabase) return {};
+    try {
+        const { data, error } = await supabase
+            .from('bot_orders')
+            .select('*')
+            .eq('phone', phone)
+            .order('created_at', { ascending: false })
+            .limit(1);
+            
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+            // Ubah format kembali ke format state AI
+            const order = data[0];
+            return {
+                order_id: order.order_id,
+                customer_phone: order.phone,
+                product: order.product,
+                quantity: order.quantity,
+                total: order.total,
+                delivery_date: order.delivery_date,
+                delivery_time: order.delivery_time,
+                delivery_address: order.delivery_address,
+                cake_writing: order.cake_writing,
+                payment_method: order.payment_method,
+                payment_status: order.payment_status,
+                order_status: order.payment_status === 'settlement' ? 'paid' : 'draft'
+            };
+        }
+        return {};
+    } catch (error) {
+        console.error('[Supabase] Error loading order:', error.message);
+        return {};
+    }
+}
+
+module.exports = {
+    logChatMessage,
+    upsertOrder,
+    loadHistory,
+    loadOrder
+};

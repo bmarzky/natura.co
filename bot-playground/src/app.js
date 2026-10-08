@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const chatRoutes = require('./routes/chatRoutes');
+const webhookRoutes = require('./routes/webhookRoutes');
 
 const app = express();
 app.use(express.json());
@@ -9,5 +10,6 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public')));
 
 app.use('/api/chat', chatRoutes);
+app.use('/api/webhook', webhookRoutes);
 
 module.exports = app;

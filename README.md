@@ -1,37 +1,38 @@
-# Natura House
+# Natura House - Enterprise Chatbot & E-Commerce System
 
-Natura House adalah platform digital untuk pemesanan kue klasik. Repositori ini berisi implementasi antarmuka pengguna (landing page) dan sistem chatbot WhatsApp berbasis kecerdasan buatan (AI) yang terintegrasi untuk menangani pesanan pelanggan secara otomatis.
-
----
-
-## Struktur Proyek
-
-- `/landing-page`: Aset statis untuk antarmuka pengguna (CSS, JS, Gambar, Dokumen HTML terkait).
-- `/api`: Backend PHP untuk penanganan Webhook WhatsApp Cloud API.
-- `/bot-playground`: Layanan Node.js dan integrasi Groq Llama-3 AI untuk pemrosesan pesan (Chatbot).
-- `/docs`: Dokumentasi spesifikasi sistem dan aturan bisnis.
-- `index.html`: Entry point antarmuka pengguna utama.
+Natura House adalah platform digital untuk pemesanan kue klasik. Repositori ini berisi implementasi antarmuka pengguna (landing page) serta sistem chatbot cerdas (AI) end-to-end yang mengotomatisasi pesanan, mengintegrasikan pembayaran *payment gateway*, dan mendukung peralihan ke agen manusia (*human-handoff*) secara *seamless*.
 
 ---
 
-## Fitur Utama
+## 📂 Struktur Proyek
 
-### 1. Antarmuka Pengguna (Landing Page)
-- **Penyesuaian Visual Berbasis Waktu**: Warna latar dan elemen visual merespons waktu akses lokal pengguna secara dinamis.
-- **Integrasi Database Real-time**: Menggunakan Supabase untuk menampilkan data ulasan pelanggan secara langsung pada antarmuka.
-
-### 2. Layanan AI Chatbot
-- **Pemrosesan Bahasa Alami**: Memanfaatkan model Llama-3 via Groq API untuk memahami dan merespons konteks percakapan secara terstruktur.
-- **Manajemen Konteks (Stateful Tracking)**: Menyimpan detail pemesanan pengguna ke dalam memori berformat JSON untuk mencegah redundansi pengumpulan data selama sesi berlangsung.
-- **Simulasi Pengujian**: Dilengkapi dengan arsitektur Express.js yang memfasilitasi pengujian alur percakapan secara mandiri pada lingkungan lokal.
-
-### 3. Integrasi WhatsApp Cloud API
-- **Pemrosesan Webhook Asinkron**: Menggunakan `fastcgi_finish_request()` pada backend PHP untuk memberikan HTTP acknowledgment instan guna mencegah kendala timeout dari sisi server Meta.
-- **Pengelolaan Status Pesan**: Secara otomatis mengirimkan pembaruan status pengiriman (Read) kepada pengguna untuk menyimulasikan interaksi dua arah secara prosedural.
+- `/landing-page` : Aset statis antarmuka utama (HTML, CSS, JS, UI dinamis berdasarkan waktu).
+- `/bot-playground` : Layanan Node.js (Express) sebagai pusat otak AI (menggunakan Groq Llama-3). Tempat webhook Midtrans, pengelolaan *State* AI, dan simulasi web-chat berjalan.
+- `/admin-dashboard` : Aplikasi web mandiri khusus Admin (Omnichannel mini). Membaca chat dari database dan langsung membalas pelanggan melalui Meta API.
+- `/api` : Folder peninggalan *backend* PHP untuk eksperimen webhook Meta lawas.
+- `/docs` : Dokumentasi spesifikasi sistem.
+- `.env` : File konfigurasi rahasia terpusat (Groq, Midtrans, Supabase, Meta API).
 
 ---
 
-## Panduan Instalasi dan Konfigurasi
+## 🚀 Fitur Utama & Arsitektur (Terbaru)
+
+### 1. Kecerdasan Buatan (AI Bot) & State Management
+- **NLP Berbasis Groq (Llama-3)**: Mengekstraksi pesanan (produk, kuantitas, tanggal, jam, alamat) dalam satu prompt terstruktur.
+- **Anti-Amnesia (Supabase Persistence)**: Riwayat percakapan (`bot_chats`) dan keranjang pesanan (`bot_orders`) disimpan secara permanen. AI tidak akan lupa konteks pesanan jika server direstart.
+- **Sistem Pembungkaman (Human-Handoff)**: Jika pelanggan komplain/meminta admin manusia, bot mengubah status menjadi `is_paused: true`, membungkam dirinya sendiri, dan mengirim sinyal bahaya ke Admin.
+
+### 2. Panel Admin (Omnichannel)
+- **Real-time Chat Viewer**: Menggunakan CDN Supabase JS, panel menarik seluruh daftar pelanggan dan histori *chat* secara instan.
+- **Direct Meta API Injection**: Admin membalas pesan melalui kolom input yang menembak Graph API Meta secara langsung, memastikan pelanggan menerima balasan dari nomor resmi Natura House tanpa memerlukan Inbox Facebook.
+
+### 3. Otomatisasi Pembayaran (Midtrans)
+- **Pembuatan Snap Token**: AI menghasilkan token virtual account / QRIS dari Midtrans secara otomatis setelah konfirmasi pesanan.
+- **Webhook Settlement**: Saat pelanggan membayar, Webhook Midtrans membangunkan AI, yang kemudian mengirimkan nota lunas dan ucapan terima kasih kepada pelanggan tanpa intervensi admin.
+
+---
+
+## 🛠️ Panduan Instalasi dan Konfigurasi
 
 ### 1. Inisialisasi Repositori
 ```bash
@@ -39,40 +40,37 @@ git clone https://github.com/bmarzky/natura.co.git
 cd natura.co
 ```
 
-### 2. Konfigurasi Kredensial Frontend
-Buat file `landing-page/js/config.js` secara manual dan tambahkan kredensial Supabase Anda:
-```javascript
-const CONFIG = {
-  SUPABASE_URL: "URL_PROYEK_SUPABASE_ANDA",
-  SUPABASE_ANON_KEY: "ANON_KEY_SUPABASE_ANDA"
-};
+### 2. Konfigurasi Kredensial Terpusat (.env)
+Ganti seluruh konfigurasi rahasia dengan membuat file `.env` di **direktori utama (root)**:
+```env
+# GROQ & MIDTRANS
+GROQ_API_KEY=gsk_...
+MIDTRANS_SERVER_KEY=Mid-server-...
+MIDTRANS_CLIENT_KEY=Mid-client-...
+
+# SUPABASE (Database)
+SUPABASE_URL=https://...supabase.co
+SUPABASE_KEY=eyJ... (Service Role Key)
+
+# WHATSAPP CLOUD META API
+WA_ACCESS_TOKEN=EAA... (Token Permanen)
+WA_PHONE_ID=139...
+ADMIN_PHONE=62895...
 ```
 
-### 3. Konfigurasi Layanan AI (Node.js)
-Masuk ke direktori chatbot, instal dependensi yang diperlukan, dan atur kredensial API:
+### 3. Menjalankan Layanan (Node.js)
+Masuk ke direktori *chatbot* dan instal semua dependensi:
 ```bash
 cd bot-playground
 npm install
-```
-Buat file `.env` pada direktori tersebut:
-```env
-PORT=3000
-GROQ_API_KEY=KUNCI_API_GROQ_ANDA
-```
-Jalankan server untuk memulai simulasi pengujian:
-```bash
 npm start
 ```
+- Server Bot (AI & Webhook) akan menyala di `http://localhost:3000`.
+- Buka `http://localhost:3000` di browser untuk masuk ke **Simulasi Chat AI (Playground)**.
 
-### 4. Konfigurasi Webhook (PHP)
-Pada lingkungan produksi (server web), buat file rahasia `api/config.php` dengan parameter berikut:
-```php
-<?php
-$accessToken = 'TOKEN_AKSES_META';
-$phoneNumberId = 'ID_NOMOR_TELEPON';
-$verifyToken = 'TOKEN_VERIFIKASI_WEBHOOK';
-?>
-```
+### 4. Mengoperasikan Panel Admin
+Tidak perlu server khusus. Buka direktori `/admin-dashboard` dan klik dua kali (buka di browser) file `index.html`. 
+Panel siap digunakan untuk merespons permintaan *Human Handoff*.
 
 ---
 Hak Cipta (c) 2026 bmarzky | Natura House
