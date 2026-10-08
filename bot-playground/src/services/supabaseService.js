@@ -1,3 +1,9 @@
+// Mencegah crash Supabase di Node.js 20 ke bawah yang belum punya WebSocket bawaan
+if (typeof global !== 'undefined' && !global.WebSocket) {
+    global.WebSocket = class WebSocket {
+        constructor() { throw new Error("Dummy WebSocket should not be called"); }
+    };
+}
 const { createClient } = require('@supabase/supabase-js');
 
 // Mengambil kredensial dari .env
