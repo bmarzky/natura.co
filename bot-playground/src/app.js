@@ -12,4 +12,8 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use('/api/chat', chatRoutes);
 app.use('/api/webhook', webhookRoutes);
 
+// Fix untuk cPanel yang kadang tidak memotong awalan /bot/
+app.use('/bot/api/chat', chatRoutes);
+app.use('/bot/api/webhook', webhookRoutes);
+
 module.exports = app;
