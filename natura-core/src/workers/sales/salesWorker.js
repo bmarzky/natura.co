@@ -10,8 +10,8 @@ async function handleSalesChat(phone, text, state) {
     const history = await getChatHistory(phone);
     history.push({ role: 'user', content: text });
     
-    const { getKotaJuangVillages } = require('../../integrations/kemendesa/locationService');
-    const villages = getKotaJuangVillages();
+    const { getVillages } = require('../../integrations/kemendesa/locationService');
+    const villages = getVillages() || [];
     
     // Inject current state, tanggal hari ini, dan info desa ke system prompt agar AI tau konteks
     const today = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
