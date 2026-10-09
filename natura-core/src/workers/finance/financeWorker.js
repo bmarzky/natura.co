@@ -25,7 +25,8 @@ async function handlePaymentChat(phone, text, state) {
 
             // Cek sudah dibayar atau belum
             if (state.payment_status === 'pending' && (text.toLowerCase().includes('sudah') || text.toLowerCase().includes('bayar'))) {
-                console.log(`[FinanceWorker] Pelanggan ${phone} klaim sudah bayar, menunggu Cron Job memvalidasinya dalam 5 menit`);
+                console.log(`[FinanceWorker] Pelanggan ${phone} klaim sudah bayar, mengubah status ke pending_claimed untuk divalidasi Cron Job.`);
+                state.payment_status = 'pending_claimed';
             }
         } catch (e) {
             console.log('[FinanceWorker] Error checking midtrans:', e.message);

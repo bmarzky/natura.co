@@ -60,7 +60,7 @@ async function upsertOrder(phone, state) {
             payment_info: state.payment_info, // Menggunakan kolom baru di tabel bot_orders
             midtrans_order_id: state.midtrans_order_id, // Menyimpan Midtrans ID spesifik
             payment_method: state.payment_method,
-            payment_status: state.order_status === 'awaiting_payment' ? 'pending' : (state.payment_status || 'draft'),
+            payment_status: state.payment_status ? state.payment_status : (state.order_status === 'awaiting_payment' ? 'pending' : 'draft'),
             is_paused: state.is_paused || false
         };
 
@@ -207,11 +207,11 @@ async function updatePaymentStatusByOrderId(orderId, paymentStatus) {
 async function getPendingOrders() {
     if (!supabase) return [];
     try {
-        // Ambil order yang statusnya pending dan belum sempat di-warn
+        // Ambil order yang statusnya pending_claimed (orang yang mengaku sudah bayar)
         const { data, error } = await supabase
             .from('bot_orders')
             .select('*')
-            .eq('payment_status', 'pending');
+            .eq('payment_status', 'pending_claimed');
             
         if (error) throw error;
         return data || [];
