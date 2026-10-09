@@ -56,9 +56,9 @@ async function upsertOrder(phone, state) {
             delivery_date: state.delivery_date,
             delivery_time: state.delivery_time,
             delivery_address: state.delivery_address || 'Pickup',
-            cake_writing: state.cake_writing,
+            cake_writing: state.payment_info ? state.payment_info : state.cake_writing, // Simpan info VA ke kolom cake_writing
             payment_method: state.payment_method,
-            payment_status: state.payment_status || 'pending',
+            payment_status: state.order_status === 'awaiting_payment' ? 'pending' : (state.payment_status || 'draft'),
             is_paused: state.is_paused || false
         };
 
@@ -122,7 +122,8 @@ async function loadOrder(phone) {
                 cake_writing: order.cake_writing,
                 payment_method: order.payment_method,
                 payment_status: order.payment_status,
-                order_status: order.payment_status === 'settlement' ? 'paid' : 'draft',
+                order_status: order.payment_status === 'settlement' ? 'paid' : (order.payment_status === 'pending' ? 'awaiting_payment' : 'draft'),
+                payment_info: order.cake_writing && order.cake_writing.includes('VA:') ? order.cake_writing : null, // Hack: simpan VA di field cake_writing jika db tak punya kolom
                 is_paused: order.is_paused || false
             };
         }

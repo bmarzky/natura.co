@@ -71,10 +71,11 @@ async function processMessage(phone, text) {
                 };
 
                 const chosenMethod = workerResult.state.payment_method || '';
+                const uniqueOrderId = `${workerResult.state.order_id}-${Date.now()}`;
                 
                 if (chosenMethod) {
                     // Cetak VA / Link Spesifik langsung
-                    const trx = await createCoreTransaction(workerResult.state.order_id, amount, customerDetails, chosenMethod);
+                    const trx = await createCoreTransaction(uniqueOrderId, amount, customerDetails, chosenMethod);
                     let paymentInstruction = "";
                     
                     if (trx.payment_type === 'bank_transfer' && trx.va_numbers && trx.va_numbers.length > 0) {
@@ -95,7 +96,7 @@ async function processMessage(phone, text) {
                         workerResult.state.payment_info = `Link QRIS: ${qrisUrl}`;
                     } else {
                         // Jika gagal parsing, kembalikan ke Snap
-                        const snapUrl = await createSnapTransaction(workerResult.state.order_id, amount, customerDetails);
+                        const snapUrl = await createSnapTransaction(uniqueOrderId, amount, customerDetails);
                         paymentInstruction = `Silakan klik tautan berikut untuk menyelesaikan tagihan Anda kak:\n🔗 ${snapUrl}`;
                         workerResult.state.payment_info = `Midtrans Link: ${snapUrl}`;
                     }
@@ -103,7 +104,7 @@ async function processMessage(phone, text) {
                     workerResult.reply.push(paymentInstruction);
                 } else {
                     // Fallback jika tidak ada metode yang dipilih (pilih sendiri via Snap)
-                    const paymentUrl = await createSnapTransaction(workerResult.state.order_id, amount, customerDetails);
+                    const paymentUrl = await createSnapTransaction(uniqueOrderId, amount, customerDetails);
                     workerResult.reply.push(`Silakan klik tautan berikut untuk mendapatkan kode pembayaran / Virtual Account kakak:\n\n🔗 ${paymentUrl}`);
                     workerResult.state.payment_info = `Midtrans Link: ${paymentUrl}`;
                 }
