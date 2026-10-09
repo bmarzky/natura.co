@@ -14,7 +14,7 @@ async function generateResponse(systemPrompt, chatHistory) {
                 { role: 'system', content: systemPrompt },
                 ...chatHistory
             ],
-            model: process.env.GROQ_MODEL || 'llama-3.1-70b-versatile',
+            model: process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
             response_format: { type: 'json_object' },
             temperature: 0.5,
         });
@@ -22,16 +22,16 @@ async function generateResponse(systemPrompt, chatHistory) {
         return JSON.parse(completion.choices[0].message.content);
     } catch (error) {
         console.error('[ModelGateway] Error generating AI response:', error.message);
-        // Jika Rate Limit tercapai, coba fallback ke model 8B yang limitnya biasanya lebih besar
-        if (error.status === 429) {
-            console.log('[ModelGateway] Rate limit tercapai! Mencoba fallback ke model ringan (llama-3.1-8b-instant)...');
+        // Fallback jika limit atau model tidak ditemukan (400 / 429)
+        if (error.status === 429 || error.status === 400 || error.status === 404) {
+            console.log('[ModelGateway] Menggunakan fallback ke model ringan (openai/gpt-oss-20b)...');
             try {
                 const fallbackCompletion = await groq.chat.completions.create({
                     messages: [
                         { role: 'system', content: systemPrompt },
                         ...chatHistory
                     ],
-                    model: 'llama-3.1-8b-instant',
+                    model: 'openai/gpt-oss-20b',
                     response_format: { type: 'json_object' },
                     temperature: 0.5,
                 });
