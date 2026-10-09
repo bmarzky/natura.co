@@ -144,12 +144,12 @@ async function markChatAsRead(phone) {
 }
 
 async function getOrderByOrderId(orderId) {
-    if (!supabase) return null;
+    if (!supabase || !orderId) return null;
     try {
         // Karena order_id dari Midtrans mengandung tambahan -timestamp,
         // kita potong bagian belakangnya untuk mendapatkan ID asli di DB.
         let baseOrderId = orderId;
-        if (orderId.split('-').length >= 3) {
+        if (typeof orderId === 'string' && orderId.split('-').length >= 3) {
             baseOrderId = orderId.substring(0, orderId.lastIndexOf('-'));
         }
 
@@ -168,10 +168,10 @@ async function getOrderByOrderId(orderId) {
 }
 
 async function updatePaymentStatusByOrderId(orderId, paymentStatus) {
-    if (!supabase) return;
+    if (!supabase || !orderId) return;
     try {
         let baseOrderId = orderId;
-        if (orderId.split('-').length >= 3) {
+        if (typeof orderId === 'string' && orderId.split('-').length >= 3) {
             baseOrderId = orderId.substring(0, orderId.lastIndexOf('-'));
         }
 
