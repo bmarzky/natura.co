@@ -95,6 +95,21 @@ async function loadHistory(phone) {
 }
 
 /**
+ * Menghapus memori chat setelah pesanan sukses agar AI tidak berhalusinasi mengulang pesanan lama
+ */
+async function clearChatHistoryDB(phone) {
+    if (!supabase) return;
+    try {
+        await supabase
+            .from('bot_chats')
+            .delete()
+            .eq('phone', phone);
+    } catch (error) {
+        console.error('[Supabase] Error clearing history:', error.message);
+    }
+}
+
+/**
  * Mengambil status pesanan terakhir agar AI ingat sampai di tahap mana
  */
 async function loadOrder(phone) {
@@ -207,6 +222,7 @@ module.exports = {
     logChatMessage,
     upsertOrder,
     loadHistory,
+    clearChatHistoryDB,
     loadOrder,
     markChatAsRead,
     getOrderByOrderId,

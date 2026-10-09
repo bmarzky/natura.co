@@ -29,6 +29,9 @@ async function processMessage(phone, text) {
     // REPEAT ORDER LOGIC
     if (pastOrder && (pastOrder.payment_status === 'settlement' || pastOrder.payment_status === 'capture')) {
         pastOrder = {};
+        // Bersihkan memori agar AI benar-benar mulai dari awal (tidak berhalusinasi dengan pesanan lama)
+        const { clearChatHistory } = require('../ai/memoryService');
+        await clearChatHistory(phone);
     }
 
     const state = Object.keys(pastOrder).length > 0 ? pastOrder : {};

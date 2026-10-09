@@ -27,7 +27,17 @@ async function addMessageToMemory(phone, role, content) {
     await logChatMessage(phone, role, content);
 }
 
+/**
+ * Menghapus memori (Reset)
+ */
+async function clearChatHistory(phone) {
+    chatHistories[phone] = [];
+    const { clearChatHistoryDB } = require('../repositories/supabaseClient');
+    await clearChatHistoryDB(phone);
+}
+
 module.exports = {
     getChatHistory,
-    addMessageToMemory
+    addMessageToMemory,
+    clearChatHistory
 };
