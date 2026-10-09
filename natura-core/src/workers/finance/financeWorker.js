@@ -17,15 +17,11 @@ async function handlePaymentChat(phone, text, state) {
         }
     }
     
-    // 2. Generate Link Manual (Fallback) jika tidak pakai Snap Midtrans
-    if (!state.payment_link && state.order_status === 'awaiting_payment') {
-        const qty = state.quantity ? parseInt(state.quantity) : 1;
-        const amount = 250000 * qty; 
-        state.payment_status = 'pending';
-        state.payment_link = 'manual_transfer'; 
-        paymentInfo = `INFO SISTEM: Sampaikan bahwa mereka harus transfer sebesar Rp${amount.toLocaleString('id-ID')} ke Rekening BSI 7250265039 Atas Nama Bima Rizki.`;
+    // 2. Tambahkan info status untuk Prompt
+    if (state.payment_info) {
+        paymentInfo = `INFO SISTEM: Status pembayaran di server adalah '${state.payment_status}'. Nomor rekening/VA/Link yang telah digenerate sebelumnya adalah: ${state.payment_info}`;
     } else {
-        paymentInfo = `INFO SISTEM: Status pembayaran di server saat ini adalah: '${state.payment_status}'.`;
+        paymentInfo = `INFO SISTEM: Status pembayaran di server adalah '${state.payment_status}'.`;
     }
 
     // 3. Tambah pesan user ke memori (Fire and forget)
