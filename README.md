@@ -1,36 +1,40 @@
-# Natura House - Enterprise AI Chatbot & E-Commerce System
+# Natura House - Enterprise Multi-Agent AI System
 
-Natura House adalah platform digital untuk pemesanan kue klasik. Repositori ini berisi implementasi antarmuka pengguna (landing page) serta sistem chatbot cerdas (AI) *end-to-end* yang mengotomatisasi pesanan, mengintegrasikan pembayaran (*payment gateway*), dan mendukung peralihan ke agen manusia (*human-handoff*) secara *seamless*. Sistem ini dirancang untuk berjalan secara tangguh di arsitektur **cPanel Multi-Worker Node.js (Passenger)**.
+Natura House adalah platform digital untuk pemesanan kue klasik. Repositori ini berisi implementasi antarmuka pengguna (landing page) serta sistem chatbot cerdas (AI) *end-to-end* yang kini beroperasi dengan arsitektur **Enterprise Multi-Agent (Divisional AI)**. Sistem ini mengotomatisasi pesanan, mengintegrasikan pembayaran Midtrans, dan mendukung peralihan ke agen manusia (*human-handoff*) secara *seamless*. Sistem ini dirancang untuk berjalan secara tangguh di arsitektur **cPanel Multi-Worker Node.js (Passenger)**.
 
 ---
 
-## Struktur Proyek
+## Struktur Proyek Terbaru (Domain-Driven Design)
 
-- `/` (Root) : Landing page interaktif (HTML, CSS, JS) dengan UI dinamis berdasarkan waktu.
-- `/natura-core` : Inti aplikasi Node.js (Express).
-  - `/src/services` : Berisi otak AI (Llama-3 via Groq), Integrasi Midtrans, dan koneksi Supabase. Termasuk solusi *DummyWebSocket* untuk kompatibilitas Node 20.
-  - `/src/routes` : Pengelola jalur Webhook Meta (WhatsApp) dan Endpoint API.
-  - `/public/admin.html` : **Admin Dashboard (Omnichannel)**. Panel kontrol HTML khusus Admin untuk memantau status pesanan, membalas chat secara manual via WhatsApp, dan mereset status AI.
-- `/api` : Folder peninggalan *backend* PHP (Legacy).
+- `/` (Root) : Landing page interaktif (HTML, CSS, JS) dengan UI dinamis.
+- `/natura-core` : Inti aplikasi Node.js (Express) yang berisi arsitektur Multi-Agent.
+  - `/src/orchestrator` : Berisi **Business Manager** sebagai pusat kontrol (CEO). Menerima *webhook* dan mendistribusikan *chat* ke divisi yang tepat.
+  - `/src/workers` : Agen-agen AI khusus dengan tugas terpisah:
+    - `/sales` : **SalesWorker** khusus menyambut pelanggan, tanya jawab, dan merekap pesanan.
+    - `/finance` : **FinanceWorker** khusus memverifikasi status pembayaran ke Midtrans dan menagih pembayaran.
+  - `/src/ai` : **Model Gateway** (Groq/Llama-3) dan **Memory Service** (Supabase) untuk mengatur memori percakapan jarak jauh antar-agen.
+  - `/src/integrations` : Layanan eksternal seperti Midtrans dan Kemendesa (API Lokasi).
+  - `/src/repositories` : Skrip klien koneksi ke Supabase Database.
+  - `/public/admin.html` : **Admin Dashboard (Omnichannel)**. Panel kontrol HTML khusus Admin untuk memantau status pesanan dan membalas *chat* secara manual via WhatsApp.
 - `.env` : File konfigurasi rahasia terpusat (Groq, Midtrans, Supabase, Meta API).
 
 ---
 
-## Fitur Utama & Arsitektur (Terbaru)
+## Fitur Utama & Arsitektur Multi-Agent
 
-### 1. Kecerdasan Buatan (AI Bot) Berbasis Llama-3
-- **Natural Language Processing (NLP)**: Bot mampu mengekstraksi pesanan (produk, kuantitas, alamat, catatan kue) melalui percakapan alami menggunakan Groq (Llama-3).
-- **Multi-Worker Synchronization**: Untuk mengatasi isu amnesia pada arsitektur *multi-worker* cPanel, riwayat percakapan (`bot_chats`) dan keranjang pesanan (`bot_orders`) ditarik dari Database secara *real-time* untuk setiap pesan masuk.
-- **Sistem Pembungkaman (Human-Handoff)**: Jika pelanggan komplain/marah, AI otomatis mengubah status pesanan di Database menjadi `is_paused: true`. AI membungkam dirinya sendiri dan mengirimkan notifikasi darurat ke nomor WhatsApp pribadi Admin.
+### 1. Pembagian Tugas AI (Divisional Agents)
+Sistem tidak lagi menggunakan satu bot besar, melainkan banyak bot kecil yang ahli di bidangnya:
+- **Sales Agent**: Berkomunikasi dengan ramah, memandu pembeli sampai keranjang belanja terkunci (`awaiting_payment`).
+- **Finance Agent**: Memiliki akses langsung ke server Midtrans. Ia akan memeriksa mutasi, menginformasikan cara transfer, dan melakukan penagihan.
+- **Business Manager (Orchestrator)**: Menjadi pengatur lalu lintas pesan agar tidak terjadi tumpang tindih jawaban antar agen.
 
 ### 2. Panel Admin (Omnichannel) Terpusat
-- **Unread Messages & Handoff Indicators**: Admin Panel beroperasi sepenuhnya dari browser. Dilengkapi indikator Titik Biru (Pesan Belum Dibaca) dan peringatan Merah Berkedip untuk pelanggan yang membutuhkan bantuan manual.
-- **Direct Meta API Injection**: Admin membalas keluhan melalui kolom input yang otomatis menembak Meta Graph API (`/send-admin`), memastikan pesan diterima pelanggan melalui nomor bisnis resmi Natura tanpa perlu membuka WhatsApp Business/Inbox FB.
-- **Bot Override Control**: Terdapat tombol "Aktifkan AI Kembali" untuk mereset status `is_paused` dan menyerahkan kendali percakapan kembali kepada AI.
+- **Unread Messages & Handoff Indicators**: Dilengkapi indikator Titik Biru (Pesan Belum Dibaca) dan peringatan Merah Berkedip untuk pelanggan yang membutuhkan bantuan manual.
+- **Sistem Pembungkaman Darurat (Human-Handoff)**: Jika pelanggan komplain (misal: "kue basi") atau marah, Sales Agent akan mengubah *intent* menjadi `human_handoff`. AI membungkam dirinya sendiri (`is_paused: true`) dan mengirim pesan darurat ke nomor WhatsApp pribadi Admin.
+- **Bot Override Control**: Terdapat tombol "Aktifkan AI Kembali" untuk mereset status `is_paused` dan menyerahkan kendali kembali kepada agen AI.
 
-### 3. Otomatisasi Pembayaran (Midtrans)
-- **Pembuatan Snap Token**: AI menghasilkan tautan pembayaran virtual account / QRIS dari Midtrans secara instan setelah pelanggan mengkonfirmasi pesanan.
-- **Webhook Settlement**: Saat pembayaran berhasil, Webhook Midtrans membangunkan AI, yang kemudian secara proaktif menghubungi pelanggan dengan nota lunas dan ucapan terima kasih (tanpa campur tangan Admin).
+### 3. Sinkronisasi Memori Jarak Jauh (Amnesia Fix)
+- Mengatasi isu "amnesia" pada arsitektur *multi-worker* cPanel dengan menarik riwayat percakapan (`bot_chats`) dan *state* keranjang pesanan (`bot_orders`) dari Database secara *real-time* sebelum agen AI merespons pesan.
 
 ---
 
@@ -64,13 +68,15 @@ Sistem ini membutuhkan Database PostgreSQL (Supabase) dengan skema berikut:
    ```bash
    git clone https://github.com/bmarzky/natura.co.git
    ```
-2. Buat file `.env` di folder *root* server untuk menyimpan kredensial `SUPABASE_URL`, `SUPABASE_KEY`, `GROQ_API_KEY`, `WA_ACCESS_TOKEN`, `WA_PHONE_ID`, `ADMIN_PHONE`, `MIDTRANS_SERVER_KEY`, dll.
-3. Konfigurasi **Setup Node.js App** di cPanel:
-   - Application Root: `/natura-core`
-   - Application URL: `domain.com/bot`
-4. Jalankan instalasi dependensi via terminal cPanel (`npm install`), lalu klik **RESTART** pada antarmuka Node.js App.
-5. Daftarkan URL Webhook (misal: `https://domain.com/bot/api/webhook/meta`) ke Meta Dashboard for Developers dengan token verifikasi yang disepakati.
-6. Akses Panel Admin melalui `https://domain.com/bot/admin.html`.
+2. Konfigurasi **Setup Node.js App** di cPanel:
+   - Application Root: `public_html/natura-core` *(atau sesuaikan letak root Anda)*
+   - Application URL: `natura-house.shop/bot`
+   - Startup File: `index.js`
+3. Buat file `.env` di dalam direktori `natura-core` berisi kredensial Anda.
+4. Klik **RUN NPM INSTALL** pada cPanel untuk memasang dependensi (pastikan sudah menekan tombol *Save*).
+5. Klik **RESTART** pada antarmuka Node.js App cPanel.
+6. Daftarkan URL Webhook: `https://natura-house.shop/bot/api/webhook/meta` ke Meta Dashboard.
+7. Buka Panel Admin melalui: `https://natura-house.shop/bot/admin.html`.
 
 ---
 Hak Cipta (c) 2026 bmarzky | Natura House
