@@ -1,6 +1,6 @@
 const express = require('express');
-const { processMessage, unpauseBot, getBotStatus, sendMetaWhatsAppMessage } = require('../services/aiService');
-const { markChatAsRead } = require('../services/supabaseService');
+const { processMessage, unpauseBot, getBotStatus, sendMetaWhatsAppMessage } = require('../orchestrator/businessManager');
+const { markChatAsRead } = require('../repositories/supabaseClient');
 
 const router = express.Router();
 

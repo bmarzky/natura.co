@@ -7,7 +7,7 @@ Natura House adalah platform digital untuk pemesanan kue klasik. Repositori ini 
 ## Struktur Proyek
 
 - `/` (Root) : Landing page interaktif (HTML, CSS, JS) dengan UI dinamis berdasarkan waktu.
-- `/bot-playground` : Inti aplikasi Node.js (Express).
+- `/natura-core` : Inti aplikasi Node.js (Express).
   - `/src/services` : Berisi otak AI (Llama-3 via Groq), Integrasi Midtrans, dan koneksi Supabase. Termasuk solusi *DummyWebSocket* untuk kompatibilitas Node 20.
   - `/src/routes` : Pengelola jalur Webhook Meta (WhatsApp) dan Endpoint API.
   - `/public/admin.html` : **Admin Dashboard (Omnichannel)**. Panel kontrol HTML khusus Admin untuk memantau status pesanan, membalas chat secara manual via WhatsApp, dan mereset status AI.
@@ -66,7 +66,7 @@ Sistem ini membutuhkan Database PostgreSQL (Supabase) dengan skema berikut:
    ```
 2. Buat file `.env` di folder *root* server untuk menyimpan kredensial `SUPABASE_URL`, `SUPABASE_KEY`, `GROQ_API_KEY`, `WA_ACCESS_TOKEN`, `WA_PHONE_ID`, `ADMIN_PHONE`, `MIDTRANS_SERVER_KEY`, dll.
 3. Konfigurasi **Setup Node.js App** di cPanel:
-   - Application Root: `/bot-playground`
+   - Application Root: `/natura-core`
    - Application URL: `domain.com/bot`
 4. Jalankan instalasi dependensi via terminal cPanel (`npm install`), lalu klik **RESTART** pada antarmuka Node.js App.
 5. Daftarkan URL Webhook (misal: `https://domain.com/bot/api/webhook/meta`) ke Meta Dashboard for Developers dengan token verifikasi yang disepakati.

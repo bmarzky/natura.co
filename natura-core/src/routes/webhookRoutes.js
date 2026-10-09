@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { handleWebhookNotification } = require('../services/aiService');
+const businessManager = require('../orchestrator/businessManager');
 
 router.post('/midtrans', async (req, res) => {
     try {
@@ -15,7 +15,7 @@ router.post('/midtrans', async (req, res) => {
         const transactionStatus = notification.transaction_status;
 
         // Oper ke AI Service agar state terupdate dan AI "terbangun" untuk berterima kasih
-        await handleWebhookNotification(orderId, transactionStatus);
+        await businessManager.handleWebhookNotification(orderId, transactionStatus);
 
         // Selalu balas 200 OK ke Midtrans agar mereka tidak mengirim notifikasi berulang kali
         res.status(200).json({ status: 'ok' });
@@ -50,7 +50,7 @@ router.get('/meta', (req, res) => {
 });
 
 // 2. Menerima Pesan Masuk dari WhatsApp
-const aiService = require('../services/aiService');
+// aiService dipindah ke businessManager
 
 router.post('/meta', async (req, res) => {
     const body = req.body;
@@ -71,7 +71,7 @@ router.post('/meta', async (req, res) => {
 
             if (text) {
                 // Jangan ditunggu (await) agar server segera membalas 200 OK ke Meta (Syarat Meta)
-                aiService.processChatMeta(phone, text).catch(e => console.log('Gagal balas meta:', e));
+                businessManager.processChatMeta(phone, text).catch(e => console.log('Gagal balas meta:', e));
             }
         }
         res.status(200).send('EVENT_RECEIVED');
