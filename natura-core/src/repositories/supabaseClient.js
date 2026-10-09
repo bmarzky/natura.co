@@ -56,7 +56,9 @@ async function upsertOrder(phone, state) {
             delivery_date: state.delivery_date,
             delivery_time: state.delivery_time,
             delivery_address: state.delivery_address || 'Pickup',
-            cake_writing: state.payment_info ? state.payment_info : state.cake_writing, // Simpan info VA ke kolom cake_writing
+            cake_writing: state.cake_writing, // Mengembalikan ke fungsi aslinya untuk request pelanggan
+            payment_info: state.payment_info, // Menggunakan kolom baru di tabel bot_orders
+            midtrans_order_id: state.midtrans_order_id, // Menyimpan Midtrans ID spesifik
             payment_method: state.payment_method,
             payment_status: state.order_status === 'awaiting_payment' ? 'pending' : (state.payment_status || 'draft'),
             is_paused: state.is_paused || false
