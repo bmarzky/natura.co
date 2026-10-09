@@ -143,10 +143,53 @@ async function markChatAsRead(phone) {
     }
 }
 
+async function getOrderByOrderId(orderId) {
+    if (!supabase) return null;
+    try {
+        // Karena order_id dari Midtrans mengandung tambahan -timestamp,
+        // kita potong bagian belakangnya untuk mendapatkan ID asli di DB.
+        let baseOrderId = orderId;
+        if (orderId.split('-').length >= 3) {
+            baseOrderId = orderId.substring(0, orderId.lastIndexOf('-'));
+        }
+
+        const { data, error } = await supabase
+            .from('bot_orders')
+            .select('*')
+            .eq('order_id', baseOrderId)
+            .limit(1);
+            
+        if (error) throw error;
+        return data && data.length > 0 ? data[0] : null;
+    } catch (error) {
+        console.error('[Supabase] Error getting order by ID:', error.message);
+        return null;
+    }
+}
+
+async function updatePaymentStatusByOrderId(orderId, paymentStatus) {
+    if (!supabase) return;
+    try {
+        let baseOrderId = orderId;
+        if (orderId.split('-').length >= 3) {
+            baseOrderId = orderId.substring(0, orderId.lastIndexOf('-'));
+        }
+
+        await supabase
+            .from('bot_orders')
+            .update({ payment_status: paymentStatus })
+            .eq('order_id', baseOrderId);
+    } catch (error) {
+        console.error('[Supabase] Error updating payment status:', error.message);
+    }
+}
+
 module.exports = {
     logChatMessage,
     upsertOrder,
     loadHistory,
     loadOrder,
-    markChatAsRead
+    markChatAsRead,
+    getOrderByOrderId,
+    updatePaymentStatusByOrderId
 };
