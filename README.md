@@ -6,17 +6,39 @@ Natura House adalah platform digital untuk pemesanan kue klasik. Repositori ini 
 
 ## Struktur Proyek Terbaru (Domain-Driven Design)
 
-- `/` (Root) : Landing page interaktif (HTML, CSS, JS) dengan UI dinamis.
-- `/natura-core` : Inti aplikasi Node.js (Express) yang berisi arsitektur Multi-Agent.
-  - `/src/orchestrator` : Berisi **Business Manager** sebagai pusat kontrol (CEO). Menerima *webhook* dan mendistribusikan *chat* ke divisi yang tepat.
-  - `/src/workers` : Agen-agen AI khusus dengan tugas terpisah:
-    - `/sales` : **SalesWorker** khusus menyambut pelanggan, tanya jawab, dan merekap pesanan.
-    - `/finance` : **FinanceWorker** khusus memverifikasi status pembayaran ke Midtrans dan menagih pembayaran.
-  - `/src/ai` : **Model Gateway** (Groq/Llama-3) dan **Memory Service** (Supabase) untuk mengatur memori percakapan jarak jauh antar-agen.
-  - `/src/integrations` : Layanan eksternal seperti Midtrans dan Kemendesa (API Lokasi).
-  - `/src/repositories` : Skrip klien koneksi ke Supabase Database.
-  - `/public/admin.html` : **Admin Dashboard (Omnichannel)**. Panel kontrol HTML khusus Admin untuk memantau status pesanan dan membalas *chat* secara manual via WhatsApp.
-- `.env` : File konfigurasi rahasia terpusat (Groq, Midtrans, Supabase, Meta API).
+```text
+natura/
+├── index.html                     # Website & aset publik (UI Dinamis)
+├── api/                           # Endpoint PHP (Peninggalan/Legacy)
+├── .env                           # Konfigurasi rahasia (Groq, Midtrans, Supabase)
+└── natura-core/                   # Inti arsitektur Node.js
+    ├── index.js                   # Entry point aplikasi (Server)
+    ├── package.json
+    ├── public/
+    │   └── admin.html             # Admin Dashboard (Omnichannel)
+    └── src/
+        ├── app.js                 # Konfigurasi rute Express
+        ├── orchestrator/          
+        │   └── businessManager.js # Pengatur lalu lintas pesan (CEO AI)
+        ├── workers/               
+        │   ├── sales/             # Divisi Sales & Customer Service
+        │   │   └── salesWorker.js
+        │   └── finance/           # Divisi Finance (Cek mutasi Midtrans)
+        │       └── financeWorker.js
+        ├── ai/                    
+        │   ├── modelGateway.js    # Koneksi ke LLM (Groq Llama-3)
+        │   └── memoryService.js   # Sistem penyimpan memori percakapan
+        ├── config/                
+        │   └── prompts/           # Kumpulan SOP untuk tiap divisi (Sales & Finance)
+        ├── integrations/          
+        │   ├── midtrans/          # Layanan Webhook & Snap Midtrans
+        │   └── kemendesa/         # API eksternal (Pencarian Desa Bireuen)
+        ├── repositories/          
+        │   └── supabaseClient.js  # Interaksi langsung dengan Database
+        └── routes/                
+            ├── chatRoutes.js      # Endpoint untuk Admin Dashboard
+            └── webhookRoutes.js   # Endpoint penerima Webhook Meta
+```
 
 ---
 
