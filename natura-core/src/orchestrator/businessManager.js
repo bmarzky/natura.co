@@ -28,7 +28,7 @@ async function processMessage(phone, text) {
 
     // REPEAT ORDER LOGIC
     if (pastOrder && (pastOrder.payment_status === 'settlement' || pastOrder.payment_status === 'capture')) {
-        pastOrder = {}; 
+        pastOrder = {};
     }
 
     const state = Object.keys(pastOrder).length > 0 ? pastOrder : {};
@@ -54,13 +54,13 @@ async function processMessage(phone, text) {
     } else {
         console.log(`[BusinessManager] Routing chat ke Divisi Sales...`);
         workerResult = await handleSalesChat(phone, text, state);
-        
+
         // INTERCEPT TRANSAKSI: Jika Sales baru saja mengubah status jadi awaiting_payment
         if (state.order_status !== 'awaiting_payment' && workerResult.state.order_status === 'awaiting_payment') {
             try {
                 const { createCoreTransaction, createSnapTransaction } = require('../integrations/midtrans/midtransService');
                 const amount = (workerResult.state.quantity || 1) * 250000;
-                
+
                 const customerDetails = {
                     first_name: "Customer",
                     phone: phone,
@@ -73,27 +73,27 @@ async function processMessage(phone, text) {
                 const chosenMethod = workerResult.state.payment_method || '';
                 const uniqueOrderId = `${workerResult.state.order_id}-${Date.now()}`;
                 workerResult.state.midtrans_order_id = uniqueOrderId;
-                
+
                 if (chosenMethod) {
                     // Cetak VA / Link Spesifik langsung
                     const trx = await createCoreTransaction(uniqueOrderId, amount, customerDetails, chosenMethod);
                     let paymentInstruction = "";
-                    
+
                     if (trx.payment_type === 'bank_transfer' && trx.va_numbers && trx.va_numbers.length > 0) {
                         const bank = trx.va_numbers[0].bank.toUpperCase();
                         const vaNum = trx.va_numbers[0].va_number;
-                        paymentInstruction = `Kode Virtual Account ${bank} kakak adalah:\n*${vaNum}*\n\nSilakan transfer sebesar Rp${amount.toLocaleString('id-ID')} ke nomor VA tersebut.`;
+                        paymentInstruction = `Kode Virtual Account ${bank} kakak adalah:\n*${vaNum}*\n\nSilakan transfer sebesar Rp${amount.toLocaleString('id-ID')} ke nomor VA tersebut. Mohon konfirmasi ke kami lagi yaa kak.`;
                         workerResult.state.payment_info = `VA ${bank}: ${vaNum} | MIDTRANS_ID:${uniqueOrderId}`;
                     } else if (trx.payment_type === 'echannel') {
-                        paymentInstruction = `Kode Biller Mandiri: *${trx.biller_code}*\nKode Bayar: *${trx.bill_key}*\n\nSilakan transfer sebesar Rp${amount.toLocaleString('id-ID')}.`;
+                        paymentInstruction = `Kode Biller Mandiri: *${trx.biller_code}*\nKode Bayar: *${trx.bill_key}*\n\nSilakan transfer sebesar Rp${amount.toLocaleString('id-ID')}. Mohon konfirmasi ke kami lagi yaa kak.`;
                         workerResult.state.payment_info = `Mandiri Biller: ${trx.biller_code}, Bill Key: ${trx.bill_key} | MIDTRANS_ID:${uniqueOrderId}`;
                     } else if (trx.payment_type === 'gopay' && trx.actions) {
                         const gopayUrl = trx.actions.find(a => a.name === 'generate-qr-code' || a.name === 'deeplink')?.url;
-                        paymentInstruction = `Silakan klik tautan GoPay berikut untuk menyelesaikan pembayaran:\n🔗 ${gopayUrl || 'https://gopay.co.id'}`;
+                        paymentInstruction = `Silakan klik tautan GoPay berikut untuk menyelesaikan pembayaran:\n🔗 ${gopayUrl || 'https://gopay.co.id'}\n\nMohon konfirmasi ke kami lagi yaa kak.`;
                         workerResult.state.payment_info = `Link GoPay: ${gopayUrl} | MIDTRANS_ID:${uniqueOrderId}`;
                     } else if (trx.payment_type === 'qris' && trx.actions) {
                         const qrisUrl = trx.actions[0]?.url;
-                        paymentInstruction = `Silakan klik tautan QRIS berikut untuk menyelesaikan pembayaran:\n🔗 ${qrisUrl}`;
+                        paymentInstruction = `Silakan klik tautan QRIS berikut untuk menyelesaikan pembayaran:\n🔗 ${qrisUrl}\n\nMohon konfirmasi ke kami lagi yaa kak.`;
                         workerResult.state.payment_info = `Link QRIS: ${qrisUrl} | MIDTRANS_ID:${uniqueOrderId}`;
                     } else {
                         // Jika gagal parsing, kembalikan ke Snap
@@ -101,7 +101,7 @@ async function processMessage(phone, text) {
                         paymentInstruction = `Silakan klik tautan berikut untuk menyelesaikan tagihan Anda kak:\n🔗 ${snapUrl}`;
                         workerResult.state.payment_info = `Midtrans Link: ${snapUrl} | MIDTRANS_ID:${uniqueOrderId}`;
                     }
-                    
+
                     workerResult.reply.push(paymentInstruction);
                 } else {
                     // Fallback jika tidak ada metode yang dipilih (pilih sendiri via Snap)
@@ -109,7 +109,7 @@ async function processMessage(phone, text) {
                     workerResult.reply.push(`Silakan klik tautan berikut untuk mendapatkan kode pembayaran / Virtual Account kakak:\n\n🔗 ${paymentUrl}`);
                     workerResult.state.payment_info = `Midtrans Link: ${paymentUrl} | MIDTRANS_ID:${uniqueOrderId}`;
                 }
-                
+
             } catch (err) {
                 console.error("Gagal membuat Transaksi Midtrans:", err);
                 const errDetail = err.message || err.toString();
@@ -162,7 +162,7 @@ async function processChatMeta(phone, text) {
             await sendMetaWhatsAppMessage(phone, "Tunggu sebentar ya kak, admin kami akan segera merespons pesan kakak 🙏");
             const adminPhone = process.env.ADMIN_PHONE;
             if (adminPhone) {
-                await sendMetaWhatsAppMessage(adminPhone, `🚨 HUMAN HANDOFF 🚨\nPelanggan dengan nomor *${phone}* butuh bantuan manual segera. AI telah dibungkam sementara.`);
+                await sendMetaWhatsAppMessage(adminPhone, `Pelanggan dengan nomor *${phone}* butuh bantuan manual segera. AI telah diberhentikan sementara.`);
             }
         }
     } catch (e) {
@@ -172,21 +172,21 @@ async function processChatMeta(phone, text) {
 
 async function handleWebhookNotification(orderId, transactionStatus) {
     console.log(`[BusinessManager] Payment webhook received for ${orderId} status: ${transactionStatus}`);
-    
+
     try {
         const { getOrderByOrderId, updatePaymentStatusByOrderId } = require('../repositories/supabaseClient');
-        
+
         // 1. Update Database
         await updatePaymentStatusByOrderId(orderId, transactionStatus);
-        
+
         // 2. Ambil data pesanan untuk mendapatkan nomor WhatsApp pelanggan
         const order = await getOrderByOrderId(orderId);
-        
+
         if (order && order.phone) {
             // 3. Jika status settlement (Lunas), kirim notifikasi!
             if (transactionStatus === 'settlement' || transactionStatus === 'capture') {
                 const message = `Terima kasih kak, pembayaran untuk pesanan ${order.product} sejumlah Rp${(order.total || 250000).toLocaleString('id-ID')} telah kami terima! Pesanan kakak akan segera kami proses dan siapkan untuk ${order.delivery_address === 'Pickup' ? 'diambil di toko' : 'dikirim'} pada tanggal ${order.delivery_date}.`;
-                
+
                 await sendMetaWhatsAppMessage(order.phone, message);
                 console.log(`[BusinessManager] Sent payment confirmation to ${order.phone}`);
             } else if (transactionStatus === 'expire') {
