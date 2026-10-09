@@ -8,7 +8,16 @@ async function handlePaymentChat(phone, text, state) {
     let paymentInfo = '';
     if (state.order_id) {
         try {
-            const checkId = state.midtrans_order_id || state.order_id;
+            let checkId = state.midtrans_order_id || state.order_id;
+            
+            // Extract from payment_info if available (karena midtrans_order_id hilang saat disimpan ke DB)
+            if (state.payment_info && state.payment_info.includes('MIDTRANS_ID:')) {
+                const match = state.payment_info.match(/MIDTRANS_ID:([^\s]+)/);
+                if (match && match[1]) {
+                    checkId = match[1];
+                }
+            }
+            
             const status = await getTransactionStatus(checkId);
             if (status.transaction_status) {
                 state.payment_status = status.transaction_status;

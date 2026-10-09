@@ -83,23 +83,23 @@ async function processMessage(phone, text) {
                         const bank = trx.va_numbers[0].bank.toUpperCase();
                         const vaNum = trx.va_numbers[0].va_number;
                         paymentInstruction = `Kode Virtual Account ${bank} kakak adalah:\n*${vaNum}*\n\nSilakan transfer sebesar Rp${amount.toLocaleString('id-ID')} ke nomor VA tersebut.`;
-                        workerResult.state.payment_info = `VA ${bank}: ${vaNum}`;
+                        workerResult.state.payment_info = `VA ${bank}: ${vaNum} | MIDTRANS_ID:${uniqueOrderId}`;
                     } else if (trx.payment_type === 'echannel') {
                         paymentInstruction = `Kode Biller Mandiri: *${trx.biller_code}*\nKode Bayar: *${trx.bill_key}*\n\nSilakan transfer sebesar Rp${amount.toLocaleString('id-ID')}.`;
-                        workerResult.state.payment_info = `Mandiri Biller: ${trx.biller_code}, Bill Key: ${trx.bill_key}`;
+                        workerResult.state.payment_info = `Mandiri Biller: ${trx.biller_code}, Bill Key: ${trx.bill_key} | MIDTRANS_ID:${uniqueOrderId}`;
                     } else if (trx.payment_type === 'gopay' && trx.actions) {
                         const gopayUrl = trx.actions.find(a => a.name === 'generate-qr-code' || a.name === 'deeplink')?.url;
                         paymentInstruction = `Silakan klik tautan GoPay berikut untuk menyelesaikan pembayaran:\n🔗 ${gopayUrl || 'https://gopay.co.id'}`;
-                        workerResult.state.payment_info = `Link GoPay: ${gopayUrl}`;
+                        workerResult.state.payment_info = `Link GoPay: ${gopayUrl} | MIDTRANS_ID:${uniqueOrderId}`;
                     } else if (trx.payment_type === 'qris' && trx.actions) {
                         const qrisUrl = trx.actions[0]?.url;
                         paymentInstruction = `Silakan klik tautan QRIS berikut untuk menyelesaikan pembayaran:\n🔗 ${qrisUrl}`;
-                        workerResult.state.payment_info = `Link QRIS: ${qrisUrl}`;
+                        workerResult.state.payment_info = `Link QRIS: ${qrisUrl} | MIDTRANS_ID:${uniqueOrderId}`;
                     } else {
                         // Jika gagal parsing, kembalikan ke Snap
                         const snapUrl = await createSnapTransaction(uniqueOrderId, amount, customerDetails);
                         paymentInstruction = `Silakan klik tautan berikut untuk menyelesaikan tagihan Anda kak:\n🔗 ${snapUrl}`;
-                        workerResult.state.payment_info = `Midtrans Link: ${snapUrl}`;
+                        workerResult.state.payment_info = `Midtrans Link: ${snapUrl} | MIDTRANS_ID:${uniqueOrderId}`;
                     }
                     
                     workerResult.reply.push(paymentInstruction);
@@ -107,7 +107,7 @@ async function processMessage(phone, text) {
                     // Fallback jika tidak ada metode yang dipilih (pilih sendiri via Snap)
                     const paymentUrl = await createSnapTransaction(uniqueOrderId, amount, customerDetails);
                     workerResult.reply.push(`Silakan klik tautan berikut untuk mendapatkan kode pembayaran / Virtual Account kakak:\n\n🔗 ${paymentUrl}`);
-                    workerResult.state.payment_info = `Midtrans Link: ${paymentUrl}`;
+                    workerResult.state.payment_info = `Midtrans Link: ${paymentUrl} | MIDTRANS_ID:${uniqueOrderId}`;
                 }
                 
             } catch (err) {
