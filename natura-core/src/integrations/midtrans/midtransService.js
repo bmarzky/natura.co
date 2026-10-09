@@ -6,9 +6,14 @@ const coreApi = new midtransClient.CoreApi({
     clientKey: process.env.MIDTRANS_CLIENT_KEY || 'SB-Mid-client-YOUR_CLIENT_KEY'
 });
 
-async function chargeTransaction(orderId, amount, customerDetails, paymentMethod) {
+const snapApi = new midtransClient.Snap({
+    isProduction: false,
+    serverKey: process.env.MIDTRANS_SERVER_KEY || 'SB-Mid-server-YOUR_SERVER_KEY',
+    clientKey: process.env.MIDTRANS_CLIENT_KEY || 'SB-Mid-client-YOUR_CLIENT_KEY'
+});
+
+async function createSnapTransaction(orderId, amount, customerDetails) {
     let parameter = {
-        "payment_type": "bank_transfer",
         "transaction_details": {
             "order_id": orderId,
             "gross_amount": amount
@@ -16,36 +21,11 @@ async function chargeTransaction(orderId, amount, customerDetails, paymentMethod
         "customer_details": customerDetails
     };
 
-    const method = paymentMethod.toLowerCase();
-
-    if (method === 'bca' || method === 'bni' || method === 'bri') {
-        parameter.payment_type = "bank_transfer";
-        parameter.bank_transfer = {
-            "bank": method
-        };
-    } else if (method === 'mandiri') {
-        parameter.payment_type = "echannel";
-        parameter.echannel = {
-            "bill_info1": "Payment:",
-            "bill_info2": "Online purchase"
-        };
-    } else if (method === 'qris') {
-        parameter.payment_type = "qris";
-    } else if (method === 'gopay') {
-        parameter.payment_type = "gopay";
-    } else {
-        // Default fallback to BCA
-        parameter.payment_type = "bank_transfer";
-        parameter.bank_transfer = {
-            "bank": "bca"
-        };
-    }
-
     try {
-        const transaction = await coreApi.charge(parameter);
-        return transaction; // Returns full Midtrans API response containing VA numbers etc.
+        const transaction = await snapApi.createTransaction(parameter);
+        return transaction.redirect_url; // Returns the payment link
     } catch (e) {
-        console.error('Midtrans Charge Error:', e.message);
+        console.error('Midtrans Snap Error:', e.message);
         throw e;
     }
 }
@@ -64,7 +44,7 @@ async function getTransactionStatus(orderId) {
 }
 
 module.exports = {
-    chargeTransaction,
+    createSnapTransaction,
     getTransactionStatus,
     coreApi
 };

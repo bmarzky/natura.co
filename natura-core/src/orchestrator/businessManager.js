@@ -54,6 +54,32 @@ async function processMessage(phone, text) {
     } else {
         console.log(`[BusinessManager] Routing chat ke Divisi Sales...`);
         workerResult = await handleSalesChat(phone, text, state);
+        
+        // INTERCEPT TRANSAKSI: Jika Sales baru saja mengubah status jadi awaiting_payment
+        if (state.order_status !== 'awaiting_payment' && workerResult.state.order_status === 'awaiting_payment') {
+            try {
+                const { createSnapTransaction } = require('../integrations/midtrans/midtransService');
+                const amount = (workerResult.state.quantity || 1) * 250000;
+                
+                const customerDetails = {
+                    first_name: "Customer",
+                    phone: phone,
+                    shipping_address: {
+                        address: workerResult.state.delivery_address || "Toko",
+                        city: "Bireuen"
+                    }
+                };
+
+                const paymentUrl = await createSnapTransaction(workerResult.state.order_id, amount, customerDetails);
+                
+                // Tambahkan link pembayaran ke pesan terakhir bot agar dibaca pelanggan
+                workerResult.reply.push(`Silakan klik tautan berikut untuk memilih metode pembayaran (BSI/GoPay/BCA, dll) dan segera menyelesaikan tagihan Anda kak: \n\n🔗 ${paymentUrl}`);
+                
+            } catch (err) {
+                console.error("Gagal membuat Snap Link Midtrans:", err);
+                workerResult.reply.push("Maaf kak, sistem pembayaran kami sedang memproses tagihan Anda. Mohon tunggu sebentar ya.");
+            }
+        }
     }
 
     // UPDATE DATABASE (Fire and Forget)
