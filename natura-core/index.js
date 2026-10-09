@@ -1,4 +1,5 @@
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') }); // <-- Wajib untuk membaca .env
 const app = require('./src/app');
 const { fetchKotaJuangVillages } = require('./src/integrations/kemendesa/locationService');
 
