@@ -9,7 +9,6 @@ Natura House adalah platform digital untuk pemesanan kue klasik. Repositori ini 
 ```text
 natura/
 ├── index.html                     # Website & aset publik (UI Dinamis)
-├── api/                           # Endpoint PHP (Peninggalan/Legacy)
 ├── .env                           # Konfigurasi rahasia (Groq, Midtrans, Supabase)
 └── natura-core/                   # Inti arsitektur Node.js
     ├── index.js                   # Entry point aplikasi (Server)
