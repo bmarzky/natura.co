@@ -1,6 +1,6 @@
 const path = require('path');
 const app = require('./src/app');
-const { fetchKotaJuangVillages } = require('./src/services/locationService');
+const { fetchKotaJuangVillages } = require('./src/integrations/kemendesa/locationService');
 
 const PORT = process.env.PORT || 3000;
 
