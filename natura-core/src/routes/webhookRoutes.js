@@ -80,4 +80,52 @@ router.post('/meta', async (req, res) => {
     }
 });
 
+// ==========================================
+// 3. ENDPOINT CRON JOB (Diakses oleh cPanel Cron)
+// GET /api/webhook/cron/check-pending
+// ==========================================
+router.get('/cron/check-pending', async (req, res) => {
+    try {
+        const { getPendingOrders, updatePaymentStatusByOrderId } = require('../repositories/supabaseClient');
+        const { getTransactionStatus } = require('../integrations/midtrans/midtransService');
+        
+        const pendingOrders = await getPendingOrders();
+        let checkedCount = 0;
+        let warnedCount = 0;
+
+        for (const order of pendingOrders) {
+            // Cek usia order (Hanya yang usianya di atas 5 menit dan di bawah 2 jam yang kita tegur)
+            const orderTime = new Date(order.created_at).getTime();
+            const now = Date.now();
+            const diffMinutes = (now - orderTime) / (1000 * 60);
+
+            if (diffMinutes >= 5 && diffMinutes <= 120) {
+                checkedCount++;
+                let checkId = order.midtrans_order_id || order.order_id;
+                const status = await getTransactionStatus(checkId);
+
+                if (status && (status.transaction_status === 'pending' || status.transaction_status === 'not_found')) {
+                    // Update status di DB agar tidak di-warn berulang-ulang setiap 5 menit
+                    await updatePaymentStatusByOrderId(order.order_id, 'pending_warned');
+                    warnedCount++;
+                    
+                    // Kirim notifikasi teguran ke WhatsApp pelanggan
+                    await businessManager.sendMetaWhatsAppMessage(
+                        order.phone, 
+                        `Maaf kak, pembayaran untuk pesanan *${order.product}* sudah kami cek berkala, namun sepertinya belum masuk ke mutasi kami. Mohon pastikan transfer sudah berhasil, atau kakak bisa melampirkan bukti transfer/struknya di sini agar kami bantu cek manual ya 🙏`
+                    );
+                } else if (status && (status.transaction_status === 'settlement' || status.transaction_status === 'capture')) {
+                    // Berjaga-jaga jika webhook Midtrans gagal, cron job ini akan mensukseskannya!
+                    await businessManager.handleWebhookNotification(checkId, status.transaction_status);
+                }
+            }
+        }
+
+        res.status(200).json({ success: true, checked: checkedCount, warned: warnedCount, total_pending: pendingOrders.length });
+    } catch (e) {
+        console.error('[Cron] Error checking pending orders:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
 module.exports = router;

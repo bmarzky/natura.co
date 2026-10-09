@@ -23,22 +23,9 @@ async function handlePaymentChat(phone, text, state) {
                 state.payment_status = status.transaction_status;
             }
 
-            // TRIGGER DELAYED FALLBACK CHECK (5 Menit)
-            if (state.payment_status === 'pending' && (text.toLowerCase().includes('sudah') || text.toLowerCase().includes('bayar') || text.toLowerCase().includes('tf') || text.toLowerCase().includes('transfer'))) {
-                console.log(`[FinanceWorker] Memulai timer 5 menit untuk nomor ${phone} karena klaim sudah bayar`);
-                setTimeout(async () => {
-                    try {
-                        console.log(`[FinanceWorker] Pengecekan ulang 5 menit berjalan untuk ${phone}`);
-                        const recheck = await getTransactionStatus(checkId);
-                        // Jika setelah 5 menit ternyata masih pending
-                        if (recheck && (recheck.transaction_status === 'pending' || recheck.transaction_status === 'not_found')) {
-                            const { sendMetaWhatsAppMessage } = require('../../orchestrator/businessManager');
-                            await sendMetaWhatsAppMessage(phone, "Maaf kak, pembayaran sudah kami cek berkala selama 5 menit ini, namun sepertinya belum masuk ke mutasi kami. Mohon pastikan transfer sudah berhasil, atau kakak bisa melampirkan bukti transfernya di sini agar kami bantu cek manual ya 🙏");
-                        }
-                    } catch (err) {
-                        console.log('[FinanceWorker] Error fallback 5 menit:', err.message);
-                    }
-                }, 5 * 60 * 1000); // 5 Menit
+            // Cek sudah dibayar atau belum
+            if (state.payment_status === 'pending' && (text.toLowerCase().includes('sudah') || text.toLowerCase().includes('bayar'))) {
+                console.log(`[FinanceWorker] Pelanggan ${phone} klaim sudah bayar, menunggu Cron Job memvalidasinya dalam 5 menit`);
             }
         } catch (e) {
             console.log('[FinanceWorker] Error checking midtrans:', e.message);

@@ -186,6 +186,23 @@ async function updatePaymentStatusByOrderId(orderId, paymentStatus) {
     }
 }
 
+async function getPendingOrders() {
+    if (!supabase) return [];
+    try {
+        // Ambil order yang statusnya pending dan belum sempat di-warn
+        const { data, error } = await supabase
+            .from('bot_orders')
+            .select('*')
+            .eq('payment_status', 'pending');
+            
+        if (error) throw error;
+        return data || [];
+    } catch (error) {
+        console.error('[Supabase] Error getting pending orders:', error.message);
+        return [];
+    }
+}
+
 module.exports = {
     logChatMessage,
     upsertOrder,
@@ -193,5 +210,6 @@ module.exports = {
     loadOrder,
     markChatAsRead,
     getOrderByOrderId,
-    updatePaymentStatusByOrderId
+    updatePaymentStatusByOrderId,
+    getPendingOrders
 };
