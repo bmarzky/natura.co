@@ -58,7 +58,7 @@ async function processMessage(phone, text) {
         // INTERCEPT TRANSAKSI: Jika Sales baru saja mengubah status jadi awaiting_payment
         if (state.order_status !== 'awaiting_payment' && workerResult.state.order_status === 'awaiting_payment') {
             try {
-                const { createSnapTransaction } = require('../integrations/midtrans/midtransService');
+                const { createCoreTransaction, createSnapTransaction } = require('../integrations/midtrans/midtransService');
                 const amount = (workerResult.state.quantity || 1) * 250000;
                 
                 const customerDetails = {
@@ -70,13 +70,46 @@ async function processMessage(phone, text) {
                     }
                 };
 
-                const paymentUrl = await createSnapTransaction(workerResult.state.order_id, amount, customerDetails);
+                const chosenMethod = workerResult.state.payment_method || '';
                 
-                // Tambahkan link pembayaran ke pesan terakhir bot agar dibaca pelanggan
-                workerResult.reply.push(`Silakan klik tautan berikut untuk mendapatkan kode pembayaran / Virtual Account kakak:\n\n🔗 ${paymentUrl}`);
+                if (chosenMethod) {
+                    // Cetak VA / Link Spesifik langsung
+                    const trx = await createCoreTransaction(workerResult.state.order_id, amount, customerDetails, chosenMethod);
+                    let paymentInstruction = "";
+                    
+                    if (trx.payment_type === 'bank_transfer' && trx.va_numbers && trx.va_numbers.length > 0) {
+                        const bank = trx.va_numbers[0].bank.toUpperCase();
+                        const vaNum = trx.va_numbers[0].va_number;
+                        paymentInstruction = `Kode Virtual Account ${bank} kakak adalah:\n*${vaNum}*\n\nSilakan transfer sebesar Rp${amount.toLocaleString('id-ID')} ke nomor VA tersebut.`;
+                        workerResult.state.payment_info = `VA ${bank}: ${vaNum}`;
+                    } else if (trx.payment_type === 'echannel') {
+                        paymentInstruction = `Kode Biller Mandiri: *${trx.biller_code}*\nKode Bayar: *${trx.bill_key}*\n\nSilakan transfer sebesar Rp${amount.toLocaleString('id-ID')}.`;
+                        workerResult.state.payment_info = `Mandiri Biller: ${trx.biller_code}, Bill Key: ${trx.bill_key}`;
+                    } else if (trx.payment_type === 'gopay' && trx.actions) {
+                        const gopayUrl = trx.actions.find(a => a.name === 'generate-qr-code' || a.name === 'deeplink')?.url;
+                        paymentInstruction = `Silakan klik tautan GoPay berikut untuk menyelesaikan pembayaran:\n🔗 ${gopayUrl || 'https://gopay.co.id'}`;
+                        workerResult.state.payment_info = `Link GoPay: ${gopayUrl}`;
+                    } else if (trx.payment_type === 'qris' && trx.actions) {
+                        const qrisUrl = trx.actions[0]?.url;
+                        paymentInstruction = `Silakan klik tautan QRIS berikut untuk menyelesaikan pembayaran:\n🔗 ${qrisUrl}`;
+                        workerResult.state.payment_info = `Link QRIS: ${qrisUrl}`;
+                    } else {
+                        // Jika gagal parsing, kembalikan ke Snap
+                        const snapUrl = await createSnapTransaction(workerResult.state.order_id, amount, customerDetails);
+                        paymentInstruction = `Silakan klik tautan berikut untuk menyelesaikan tagihan Anda kak:\n🔗 ${snapUrl}`;
+                        workerResult.state.payment_info = `Midtrans Link: ${snapUrl}`;
+                    }
+                    
+                    workerResult.reply.push(paymentInstruction);
+                } else {
+                    // Fallback jika tidak ada metode yang dipilih (pilih sendiri via Snap)
+                    const paymentUrl = await createSnapTransaction(workerResult.state.order_id, amount, customerDetails);
+                    workerResult.reply.push(`Silakan klik tautan berikut untuk mendapatkan kode pembayaran / Virtual Account kakak:\n\n🔗 ${paymentUrl}`);
+                    workerResult.state.payment_info = `Midtrans Link: ${paymentUrl}`;
+                }
                 
             } catch (err) {
-                console.error("Gagal membuat Snap Link Midtrans:", err);
+                console.error("Gagal membuat Transaksi Midtrans:", err);
                 workerResult.reply.push("Maaf kak, sistem pembayaran kami sedang memproses tagihan Anda. Mohon tunggu sebentar ya.");
             }
         }
