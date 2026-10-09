@@ -72,6 +72,7 @@ async function processMessage(phone, text) {
 
                 const chosenMethod = workerResult.state.payment_method || '';
                 const uniqueOrderId = `${workerResult.state.order_id}-${Date.now()}`;
+                workerResult.state.midtrans_order_id = uniqueOrderId;
                 
                 if (chosenMethod) {
                     // Cetak VA / Link Spesifik langsung

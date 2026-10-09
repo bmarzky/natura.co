@@ -8,7 +8,8 @@ async function handlePaymentChat(phone, text, state) {
     let paymentInfo = '';
     if (state.order_id) {
         try {
-            const status = await getTransactionStatus(state.order_id);
+            const checkId = state.midtrans_order_id || state.order_id;
+            const status = await getTransactionStatus(checkId);
             if (status.transaction_status) {
                 state.payment_status = status.transaction_status;
             }
