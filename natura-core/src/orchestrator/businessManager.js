@@ -185,9 +185,14 @@ async function handleWebhookNotification(orderId, transactionStatus) {
         if (order && order.phone) {
             // 3. Jika status settlement (Lunas), kirim notifikasi!
             if (transactionStatus === 'settlement' || transactionStatus === 'capture') {
-                const message = `Terima kasih kak, pembayaran untuk pesanan ${order.product} sejumlah Rp${(order.total || 250000).toLocaleString('id-ID')} telah kami terima! Pesanan kakak akan segera kami proses dan siapkan untuk ${order.delivery_address === 'Pickup' ? 'diambil di toko' : 'dikirim'} pada tanggal ${order.delivery_date}.`;
-
+                const message = `Terima kasih kak, pembayaran untuk pesanan ${order.product} sejumlah Rp${(order.total || 250000).toLocaleString('id-ID')} telah kami terima! Pesanan kakak akan segera kami proses dan siapkan untuk ${order.delivery_address.toLowerCase() === 'pickup' ? 'diambil di toko' : 'dikirim'} pada tanggal ${order.delivery_date}.`;
                 await sendMetaWhatsAppMessage(order.phone, message);
+                
+                // Bubble Terima Kasih Terakhir
+                setTimeout(async () => {
+                    await sendMetaWhatsAppMessage(order.phone, "Terima kasih banyak sudah mempercayakan pesanan kue kakak kepada Natura House. Semoga harinya menyenangkan! 🥰🎂");
+                }, 1000);
+                
                 console.log(`[BusinessManager] Sent payment confirmation to ${order.phone}`);
             } else if (transactionStatus === 'expire') {
                 await sendMetaWhatsAppMessage(order.phone, `⚠️ Maaf kak, waktu pembayaran untuk pesanan *${order.product}* telah habis. Jika kakak masih ingin memesan, silakan hubungi kami untuk membuat pesanan baru ya.`);
