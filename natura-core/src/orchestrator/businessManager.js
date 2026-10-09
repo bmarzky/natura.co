@@ -56,8 +56,8 @@ async function processMessage(phone, text) {
         workerResult = await handleSalesChat(phone, text, state);
     }
 
-    // UPDATE DATABASE
-    await upsertOrder(phone, workerResult.state);
+    // UPDATE DATABASE (Fire and Forget)
+    upsertOrder(phone, workerResult.state).catch(e => console.log('Error upsert:', e));
 
     // CEK HUMAN HANDOFF
     if (workerResult.intent === 'human_handoff') {

@@ -28,9 +28,10 @@ async function handlePaymentChat(phone, text, state) {
         paymentInfo = `INFO SISTEM: Status pembayaran di server saat ini adalah: '${state.payment_status}'.`;
     }
 
-    // 3. Tambah pesan user ke memori
-    await addMessageToMemory(phone, 'user', text);
+    // 3. Tambah pesan user ke memori (Fire and forget)
+    addMessageToMemory(phone, 'user', text).catch(e => console.log('Error memori:', e));
     const history = await getChatHistory(phone);
+    history.push({ role: 'user', content: text });
     
     // 4. Inject prompt
     const dynamicPrompt = FINANCE_PROMPT + `\n\n[STATE SAAT INI]\n${JSON.stringify(state, null, 2)}\n\n${paymentInfo}`;
@@ -38,8 +39,9 @@ async function handlePaymentChat(phone, text, state) {
     // 5. Panggil LLM
     const aiOutput = await generateResponse(dynamicPrompt, history);
     
+    // 6. Simpan pesan AI ke memori (Fire and forget)
     if (aiOutput.reply && aiOutput.reply.length > 0) {
-        await addMessageToMemory(phone, 'assistant', aiOutput.reply.join(' '));
+        addMessageToMemory(phone, 'assistant', aiOutput.reply.join(' ')).catch(e => console.log('Error memori:', e));
     }
 
     return {
