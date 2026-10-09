@@ -73,7 +73,7 @@ async function processMessage(phone, text) {
                 const paymentUrl = await createSnapTransaction(workerResult.state.order_id, amount, customerDetails);
                 
                 // Tambahkan link pembayaran ke pesan terakhir bot agar dibaca pelanggan
-                workerResult.reply.push(`Silakan klik tautan berikut untuk memilih metode pembayaran (BSI/GoPay/BCA, dll) dan segera menyelesaikan tagihan Anda kak: \n\n🔗 ${paymentUrl}`);
+                workerResult.reply.push(`Silakan klik tautan berikut untuk mendapatkan kode pembayaran / Virtual Account kakak:\n\n🔗 ${paymentUrl}`);
                 
             } catch (err) {
                 console.error("Gagal membuat Snap Link Midtrans:", err);
