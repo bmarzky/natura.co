@@ -142,8 +142,9 @@ async function loadOrder(phone) {
                 cake_writing: order.cake_writing,
                 payment_method: order.payment_method,
                 payment_status: order.payment_status,
-                order_status: order.payment_status === 'settlement' ? 'paid' : (order.payment_status === 'pending' ? 'awaiting_payment' : 'draft'),
-                payment_info: order.cake_writing && order.cake_writing.includes('VA:') ? order.cake_writing : null, // Hack: simpan VA di field cake_writing jika db tak punya kolom
+                order_status: order.payment_status === 'settlement' ? 'paid' : 
+                              (order.payment_status === 'pending' || order.payment_status === 'pending_claimed' || order.payment_status === 'pending_warned' ? 'awaiting_payment' : 'draft'),
+                payment_info: order.payment_info || (order.cake_writing && order.cake_writing.includes('VA:') ? order.cake_writing : null),
                 is_paused: order.is_paused || false
             };
         }
