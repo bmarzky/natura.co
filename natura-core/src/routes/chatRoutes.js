@@ -13,8 +13,8 @@ router.post('/', async (req, res) => {
 router.post('/unpause', async (req, res) => {
   const { phone } = req.body;
   if (!phone) return res.status(400).json({ error: "Phone number required" });
-  const result = await unpauseBot(phone);
-  res.json(result);
+  await unpauseBot(phone);
+  res.json({ success: true });
 });
 
 router.get('/status/:phone', async (req, res) => {
