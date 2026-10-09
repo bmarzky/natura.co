@@ -184,7 +184,7 @@ async function handleWebhookNotification(orderId, transactionStatus) {
         if (order && order.phone) {
             // 3. Jika status settlement (Lunas), kirim notifikasi!
             if (transactionStatus === 'settlement' || transactionStatus === 'capture') {
-                const message = `🎉 *PEMBAYARAN BERHASIL!* 🎉\n\nTerima kasih kak, pembayaran untuk pesanan *${order.product}* sejumlah Rp${(order.total || 250000).toLocaleString('id-ID')} telah kami terima!\n\nPesanan kakak akan segera kami proses dan siapkan untuk ${order.delivery_address === 'Pickup' ? 'diambil di toko' : 'dikirim'} pada tanggal ${order.delivery_date}.\n\nJika ada pertanyaan lebih lanjut, jangan ragu untuk menghubungi kami kembali ya kak! 😊`;
+                const message = `Terima kasih kak, pembayaran untuk pesanan ${order.product} sejumlah Rp${(order.total || 250000).toLocaleString('id-ID')} telah kami terima! Pesanan kakak akan segera kami proses dan siapkan untuk ${order.delivery_address === 'Pickup' ? 'diambil di toko' : 'dikirim'} pada tanggal ${order.delivery_date}.`;
                 
                 await sendMetaWhatsAppMessage(order.phone, message);
                 console.log(`[BusinessManager] Sent payment confirmation to ${order.phone}`);
