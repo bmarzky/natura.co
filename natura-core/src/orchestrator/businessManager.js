@@ -110,7 +110,8 @@ async function processMessage(phone, text) {
                 
             } catch (err) {
                 console.error("Gagal membuat Transaksi Midtrans:", err);
-                workerResult.reply.push("Maaf kak, sistem pembayaran kami sedang memproses tagihan Anda. Mohon tunggu sebentar ya.");
+                const errDetail = err.message || err.toString();
+                workerResult.reply.push(`Maaf kak, sistem pembayaran gagal terhubung (Error Midtrans: ${errDetail}). Mohon hubungi admin.`);
             }
         }
     }
