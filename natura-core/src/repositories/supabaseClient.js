@@ -83,6 +83,7 @@ async function loadHistory(phone) {
             .from('bot_chats')
             .select('role, content')
             .eq('phone', phone)
+            .eq('is_archived', false)
             .order('created_at', { ascending: true })
             .limit(30); // Ambil 30 pesan terakhir agar konteks tidak terlalu berat
             
@@ -95,17 +96,19 @@ async function loadHistory(phone) {
 }
 
 /**
- * Menghapus memori chat setelah pesanan sukses agar AI tidak berhalusinasi mengulang pesanan lama
+ * Mengarsipkan memori chat (Bukan menghapus) setelah pesanan sukses agar AI tidak berhalusinasi,
+ * namun data aslinya tetap aman di database untuk keperluan analitik / pantauan Admin.
  */
 async function clearChatHistoryDB(phone) {
     if (!supabase) return;
     try {
         await supabase
             .from('bot_chats')
-            .delete()
-            .eq('phone', phone);
+            .update({ is_archived: true })
+            .eq('phone', phone)
+            .eq('is_archived', false);
     } catch (error) {
-        console.error('[Supabase] Error clearing history:', error.message);
+        console.error('[Supabase] Error archiving history:', error.message);
     }
 }
 
