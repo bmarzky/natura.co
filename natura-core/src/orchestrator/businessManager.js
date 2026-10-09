@@ -155,10 +155,16 @@ async function processChatMeta(phone, text) {
         const result = await processMessage(phone, text);
         const replies = result.reply || [];
 
-        for (const replyText of replies) {
+        for (let i = 0; i < replies.length; i++) {
+            const replyText = replies[i];
+            
+            // Simulasi jeda pengetikan agar terasa seperti manusia asli (bukan bot instan)
+            // Kalkulasi: 40ms per karakter, min 1 detik, max 3.5 detik
+            const typingTime = Math.max(1000, Math.min(replyText.length * 40, 3500));
+            const delay = i === 0 ? Math.min(typingTime, 1500) : typingTime; // Pesan pertama jangan kelamaan
+            
+            await new Promise(resolve => setTimeout(resolve, delay));
             await sendMetaWhatsAppMessage(phone, replyText);
-            // Jeda 500ms agar pesan berurutan
-            await new Promise(resolve => setTimeout(resolve, 500));
         }
 
         if (result.intent === 'human_handoff') {
