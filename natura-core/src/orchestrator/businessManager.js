@@ -16,7 +16,7 @@ async function sendMetaWhatsAppMessage(phone, text) {
             { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
         );
     } catch (e) {
-        console.error('[Meta API] Gagal kirim WA:', e.message);
+        console.error('[Meta API] Gagal kirim WA ke', phone, ':', e.response ? JSON.stringify(e.response.data) : e.message);
     }
 }
 
@@ -157,6 +157,7 @@ async function processChatMeta(phone, text) {
 
         for (let i = 0; i < replies.length; i++) {
             const replyText = replies[i];
+            if (!replyText || typeof replyText !== 'string') continue; // Pengaman jika balasan kosong
             
             // Simulasi jeda pengetikan agar terasa seperti manusia asli (bukan bot instan)
             // Kalkulasi: 40ms per karakter, min 1 detik, max 3.5 detik
