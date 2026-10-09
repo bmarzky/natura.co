@@ -1,15 +1,19 @@
 const midtransClient = require('midtrans-client');
 
+const serverKey = process.env.MIDTRANS_SERVER_KEY || 'SB-Mid-server-YOUR_SERVER_KEY';
+const clientKey = process.env.MIDTRANS_CLIENT_KEY || 'SB-Mid-client-YOUR_CLIENT_KEY';
+const isProd = serverKey.startsWith('Mid-server');
+
 const coreApi = new midtransClient.CoreApi({
-    isProduction: false,
-    serverKey: process.env.MIDTRANS_SERVER_KEY || 'SB-Mid-server-YOUR_SERVER_KEY',
-    clientKey: process.env.MIDTRANS_CLIENT_KEY || 'SB-Mid-client-YOUR_CLIENT_KEY'
+    isProduction: isProd,
+    serverKey: serverKey,
+    clientKey: clientKey
 });
 
 const snapApi = new midtransClient.Snap({
-    isProduction: false,
-    serverKey: process.env.MIDTRANS_SERVER_KEY || 'SB-Mid-server-YOUR_SERVER_KEY',
-    clientKey: process.env.MIDTRANS_CLIENT_KEY || 'SB-Mid-client-YOUR_CLIENT_KEY'
+    isProduction: isProd,
+    serverKey: serverKey,
+    clientKey: clientKey
 });
 
 async function createCoreTransaction(orderId, amount, customerDetails, paymentMethod) {
