@@ -160,35 +160,62 @@ async function unpauseBot(phone) {
     }
 }
 
+// ============================================================
+// DEBOUNCE BUFFER — Menangani pesan yang dikirim bertubi-tubi
+// Jika customer kirim 3 pesan dalam 2 detik, digabung jadi 1 input
+// ============================================================
+const messageBuffers = {};
+const DEBOUNCE_MS = 2000; // Tunggu 2 detik setelah pesan terakhir
+
 // Handler khusus untuk Webhook Meta (Menerima Event dari luar)
 async function processChatMeta(phone, text) {
-    try {
-        const result = await processMessage(phone, text);
-        const replies = result.reply || [];
-
-        for (let i = 0; i < replies.length; i++) {
-            const replyText = replies[i];
-            if (!replyText || typeof replyText !== 'string') continue; // Pengaman jika balasan kosong
-            
-            // Simulasi jeda pengetikan agar terasa seperti manusia asli (bukan bot instan)
-            // Kalkulasi: 30ms per karakter, min 800ms, max 2 detik (dikurangi agar tidak timeout webhook)
-            const typingTime = Math.max(800, Math.min(replyText.length * 30, 2000));
-            const delay = i === 0 ? Math.min(typingTime, 1000) : typingTime; // Pesan pertama jangan kelamaan
-            
-            await new Promise(resolve => setTimeout(resolve, delay));
-            await sendMetaWhatsAppMessage(phone, replyText);
-        }
-
-        if (result.intent === 'human_handoff') {
-            await sendMetaWhatsAppMessage(phone, "Tunggu sebentar ya kak, admin kami akan segera merespons pesan kakak 🙏");
-            const adminPhone = process.env.ADMIN_PHONE;
-            if (adminPhone) {
-                await sendMetaWhatsAppMessage(adminPhone, `Pelanggan dengan nomor *${phone}* butuh bantuan manual segera. AI telah diberhentikan sementara.`);
-            }
-        }
-    } catch (e) {
-        console.error('[BusinessManager] Error memproses webhook meta:', e);
+    // Inisialisasi buffer jika belum ada
+    if (!messageBuffers[phone]) {
+        messageBuffers[phone] = { timer: null, messages: [] };
     }
+
+    // Tambahkan pesan ke antrian buffer
+    messageBuffers[phone].messages.push(text);
+    console.log(`[BusinessManager] Buffer ${phone}: ${messageBuffers[phone].messages.length} pesan menunggu.`);
+
+    // Reset timer setiap ada pesan baru (debounce)
+    clearTimeout(messageBuffers[phone].timer);
+    messageBuffers[phone].timer = setTimeout(async () => {
+        // Ambil semua pesan yang terkumpul lalu bersihkan buffer
+        const collectedMessages = messageBuffers[phone]?.messages || [];
+        delete messageBuffers[phone];
+
+        // Gabungkan semua pesan menjadi satu input
+        const combinedText = collectedMessages.join('\n');
+        console.log(`[BusinessManager] Memproses ${collectedMessages.length} pesan tergabung dari ${phone}: "${combinedText}"`);
+
+        try {
+            const result = await processMessage(phone, combinedText);
+            const replies = result.reply || [];
+
+            for (let i = 0; i < replies.length; i++) {
+                const replyText = replies[i];
+                if (!replyText || typeof replyText !== 'string') continue;
+
+                // Simulasi jeda pengetikan (max 2 detik)
+                const typingTime = Math.max(800, Math.min(replyText.length * 30, 2000));
+                const delay = i === 0 ? Math.min(typingTime, 1000) : typingTime;
+
+                await new Promise(resolve => setTimeout(resolve, delay));
+                await sendMetaWhatsAppMessage(phone, replyText);
+            }
+
+            if (result.intent === 'human_handoff') {
+                await sendMetaWhatsAppMessage(phone, "Tunggu sebentar ya kak, admin kami akan segera merespons pesan kakak.");
+                const adminPhone = process.env.ADMIN_PHONE;
+                if (adminPhone) {
+                    await sendMetaWhatsAppMessage(adminPhone, `Pelanggan dengan nomor *${phone}* butuh bantuan manual segera. AI telah diberhentikan sementara.`);
+                }
+            }
+        } catch (e) {
+            console.error('[BusinessManager] Error memproses webhook meta:', e);
+        }
+    }, DEBOUNCE_MS);
 }
 
 async function handleWebhookNotification(orderId, transactionStatus) {
