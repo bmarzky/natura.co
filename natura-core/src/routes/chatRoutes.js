@@ -1,5 +1,5 @@
 const express = require('express');
-const { processMessage, unpauseBot, getBotStatus, sendMetaWhatsAppMessage } = require('../orchestrator/businessManager');
+const { processMessage, unpauseBot, pauseBot, getBotStatus, sendMetaWhatsAppMessage } = require('../orchestrator/businessManager');
 const { markChatAsRead } = require('../repositories/supabaseClient');
 
 const router = express.Router();
@@ -14,6 +14,13 @@ router.post('/unpause', async (req, res) => {
   const { phone } = req.body;
   if (!phone) return res.status(400).json({ error: "Phone number required" });
   await unpauseBot(phone);
+  res.json({ success: true });
+});
+
+router.post('/pause', async (req, res) => {
+  const { phone } = req.body;
+  if (!phone) return res.status(400).json({ error: "Phone number required" });
+  await pauseBot(phone);
   res.json({ success: true });
 });
 

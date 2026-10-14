@@ -54,8 +54,8 @@
                 </div>
                 <div class="flex items-center gap-3">
                     <span id="active-status" class="text-xs text-gray-500 hidden">[ AI Sedang Aktif ]</span>
-                    <button onclick="unpauseBot()" id="btn-unpause" class="hidden text-xs bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded transition-colors shadow-sm">
-                        Aktifkan AI Kembali
+                    <button onclick="toggleBot()" id="btn-toggle" class="hidden text-xs px-3 py-1 rounded transition-colors shadow-sm font-bold">
+                        ...
                     </button>
                 </div>
             </div>
@@ -227,7 +227,7 @@
         async function loadOrderDetails(phone) {
             const detailBox = document.getElementById('order-details-box');
             const statusIndicator = document.getElementById('active-status');
-            const btnUnpause = document.getElementById('btn-unpause');
+            statusIndicator.classList.remove('hidden');
             
             let state = {};
             const { data, error } = await supabaseClient.from('bot_orders').select('*').eq('phone', phone).order('created_at', { ascending: false }).limit(1);
@@ -236,13 +236,18 @@
 
             // Gunakan is_paused langsung dari Supabase Database (Paling Akurat)
             const is_paused = state.is_paused || false;
-            
+            const btnToggle = document.getElementById('btn-toggle');
+            btnToggle.classList.remove('hidden');
+            btnToggle.dataset.paused = is_paused ? 'true' : 'false';
+
             if (is_paused) {
-                statusIndicator.innerHTML = '<span class="text-[#f85149] blink">[ Butuh Bantuan Admin ]</span>';
-                btnUnpause.classList.remove('hidden');
+                statusIndicator.innerHTML = '<span class="text-[#f85149] blink">[ AI Dimatikan ]</span>';
+                btnToggle.textContent = 'Aktifkan AI';
+                btnToggle.className = 'text-xs px-3 py-1 rounded transition-colors shadow-sm font-bold bg-green-600 hover:bg-green-700 text-white';
             } else {
-                statusIndicator.innerHTML = '<span class="text-[#56d364] terminal-glow">[ AI Sedang Aktif ]</span>';
-                btnUnpause.classList.add('hidden');
+                statusIndicator.innerHTML = '<span class="text-[#56d364]">[ AI Aktif ]</span>';
+                btnToggle.textContent = 'Matikan AI';
+                btnToggle.className = 'text-xs px-3 py-1 rounded transition-colors shadow-sm font-bold bg-red-500 hover:bg-red-600 text-white';
             }
 
             if (Object.keys(state).length === 0) return;
@@ -304,10 +309,17 @@
             if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
         });
 
-        async function unpauseBot() {
+        async function toggleBot() {
             if (!currentPhone) return;
+            const btnToggle = document.getElementById('btn-toggle');
+            const isPaused = btnToggle.dataset.paused === 'true';
+            const endpoint = isPaused ? '/bot/api/chat/unpause' : '/bot/api/chat/pause';
+            
+            btnToggle.disabled = true;
+            btnToggle.textContent = 'Memproses...';
+
             try {
-                const res = await fetch('/bot/api/chat/unpause', {
+                const res = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ phone: currentPhone })
@@ -316,7 +328,9 @@
                 if (data.success) loadOrderDetails(currentPhone);
             } catch (err) {
                 alert("Gagal menghubungi server: " + err.message);
-                loadOrderDetails(currentPhone); // reload state anyway
+            } finally {
+                btnToggle.disabled = false;
+                loadOrderDetails(currentPhone);
             }
         }
 

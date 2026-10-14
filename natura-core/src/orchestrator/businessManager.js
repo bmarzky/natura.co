@@ -154,8 +154,16 @@ async function getBotStatus(phone) {
 
 async function unpauseBot(phone) {
     const order = await loadOrder(phone);
-    if (order) {
+    if (order && Object.keys(order).length > 0) {
         order.is_paused = false;
+        await upsertOrder(phone, order);
+    }
+}
+
+async function pauseBot(phone) {
+    const order = await loadOrder(phone);
+    if (order && Object.keys(order).length > 0) {
+        order.is_paused = true;
         await upsertOrder(phone, order);
     }
 }
@@ -256,6 +264,7 @@ module.exports = {
     processChatMeta,
     getBotStatus,
     unpauseBot,
+    pauseBot,
     sendMetaWhatsAppMessage,
     handleWebhookNotification
 };
