@@ -79,9 +79,15 @@ Sistem menggunakan arsitektur agen terpisah, bukan satu bot monolitik:
 
 ### Panel Admin (Omnichannel)
 
-- Indikator pesan belum dibaca dan status *human-handoff*.
-- Tombol **Aktifkan AI Kembali** untuk mereset status `is_paused` setelah admin selesai menangani pelanggan secara manual.
+- Indikator pesan belum dibaca dan status *human-handoff* (merah berkedip).
+- **Tombol Toggle ON/OFF Manual**: Admin dapat mematikan atau mengaktifkan kembali bot untuk pelanggan manapun kapan saja, tanpa menunggu trigger dari percakapan.
+- Bot juga mematikan dirinya sendiri otomatis (`is_paused = true`) jika AI mendeteksi pelanggan membutuhkan penanganan manusia.
 - Kemampuan mengirim pesan langsung ke pelanggan dari dashboard.
+
+### Debounce Pesan
+
+- Jika pelanggan mengirim beberapa pesan dalam waktu singkat (kurang dari 800ms), semua pesan dikumpulkan terlebih dahulu dan digabung menjadi satu input sebelum dikirim ke AI.
+- Mencegah *race condition* dan balasan yang tidak koheren akibat pemrosesan paralel.
 
 ---
 
@@ -162,7 +168,7 @@ ADMIN_PHONE=628xxxxxxxxxx     # Nomor WA admin (format internasional, tanpa +)
    - Startup File: `index.js`
    - Node.js Version: `22.x`
 
-3. Buat file `.env` di dalam `public_html/natura-core/` berisi semua kredensial di atas.
+3. Buat file `.env` di **satu direktori di atas `natura-core/`** (yaitu di `public_html/.env`), berisi semua kredensial di atas.
 
 4. Klik **Run NPM Install** di cPanel untuk memasang dependensi.
 
@@ -197,6 +203,7 @@ Kemudian restart aplikasi via **cPanel > Setup Node.js App > Restart**.
 | `GET` | `/api/webhook/cron/check-pending` | Cron job cek pembayaran tertunda |
 | `POST` | `/api/chat` | Kirim pesan via Admin Dashboard |
 | `GET` | `/api/chat/status/:phone` | Cek status bot untuk nomor tertentu |
+| `POST` | `/api/chat/pause` | Matikan bot secara manual dari admin |
 | `POST` | `/api/chat/unpause` | Aktifkan kembali bot setelah handoff |
 | `POST` | `/api/chat/send-admin` | Kirim pesan manual dari admin |
 | `POST` | `/api/chat/mark-read/:phone` | Tandai pesan sebagai sudah dibaca |
