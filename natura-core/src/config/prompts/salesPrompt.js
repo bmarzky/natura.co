@@ -57,6 +57,7 @@ ATURAN OUTPUT JSON:
     "product": "Classic Black Forest",
     "quantity": "jumlah atau null",
     "delivery_date": "tanggal atau null",
+    "delivery_time": "jam pengiriman atau null",
     "delivery_address": "alamat atau null",
     "payment_method": "metode yang dipilih (misal: bsi, gopay) atau null",
     "order_status": "draft atau awaiting_payment"

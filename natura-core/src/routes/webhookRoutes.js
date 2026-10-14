@@ -65,6 +65,20 @@ router.post('/meta', async (req, res) => {
                 text = message.text.body;
             } else if (message.type === 'image') {
                 text = "[Mengirim Gambar/Foto]";
+            } else if (message.type === 'location') {
+                // Pelanggan share pin lokasi — konversi ke teks alamat
+                const { reverseGeocode } = require('../utils/geocodingService');
+                const { latitude, longitude } = message.location;
+                try {
+                    const geo = await reverseGeocode(latitude, longitude);
+                    if (geo && geo.village) {
+                        text = `[Lokasi Pin] ${geo.village}, ${geo.district}`;
+                    } else {
+                        text = `[Lokasi Pin] Koordinat: ${latitude}, ${longitude}`;
+                    }
+                } catch (e) {
+                    text = `[Lokasi Pin] Koordinat: ${latitude}, ${longitude}`;
+                }
             }
 
             console.log(`[WhatsApp API Masuk] Dari: ${phone} | Pesan: ${text}`);

@@ -1,7 +1,7 @@
 const { generateResponse } = require('../../ai/modelGateway');
 const { getChatHistory, addMessageToMemory } = require('../../ai/memoryService');
 const { FINANCE_PROMPT } = require('../../config/prompts/financePrompt');
-const { getTransactionStatus, chargeTransaction } = require('../../integrations/midtrans/midtransService');
+const { getTransactionStatus } = require('../../integrations/midtrans/midtransService');
 
 async function handlePaymentChat(phone, text, state) {
     // 1. Coba check pembayaran ke Midtrans terlebih dahulu

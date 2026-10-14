@@ -1,6 +1,6 @@
 const { handleSalesChat } = require('../workers/sales/salesWorker');
 const { handlePaymentChat } = require('../workers/finance/financeWorker');
-const { loadOrder, upsertOrder, loadHistory } = require('../repositories/supabaseClient');
+const { loadOrder, upsertOrder } = require('../repositories/supabaseClient');
 const axios = require('axios');
 
 // Fungsi untuk menembak Meta WhatsApp API langsung (Diambil dari aiService.js lama)
