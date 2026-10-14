@@ -250,6 +250,7 @@ async function setPauseState(phone, isPaused) {
         const { error: insertError } = await supabase.from('bot_orders').upsert({
             order_id: `CTRL-${phone}`,
             phone: phone,
+            product: 'Classic Black Forest',
             payment_status: 'draft',
             is_paused: isPaused,
             total: 0
