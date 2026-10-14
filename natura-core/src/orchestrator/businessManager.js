@@ -165,7 +165,7 @@ async function unpauseBot(phone) {
 // Jika customer kirim 3 pesan dalam 2 detik, digabung jadi 1 input
 // ============================================================
 const messageBuffers = {};
-const DEBOUNCE_MS = 2000; // Tunggu 2 detik setelah pesan terakhir
+const DEBOUNCE_MS = 800; // 800ms — cukup tangkap burst, hampir tidak terasa untuk pesan normal
 
 // Handler khusus untuk Webhook Meta (Menerima Event dari luar)
 async function processChatMeta(phone, text) {
