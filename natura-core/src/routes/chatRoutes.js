@@ -1,6 +1,6 @@
 const express = require('express');
 const { processMessage, unpauseBot, pauseBot, getBotStatus, sendMetaWhatsAppMessage } = require('../orchestrator/businessManager');
-const { markChatAsRead } = require('../repositories/supabaseClient');
+const { markChatAsRead, loadOrder } = require('../repositories/supabaseClient');
 
 const router = express.Router();
 
@@ -13,15 +13,29 @@ router.post('/', async (req, res) => {
 router.post('/unpause', async (req, res) => {
   const { phone } = req.body;
   if (!phone) return res.status(400).json({ error: "Phone number required" });
-  await unpauseBot(phone);
-  res.json({ success: true });
+  try {
+    await unpauseBot(phone);
+    const order = await loadOrder(phone);
+    if (order && order.is_paused === true) return res.status(500).json({ error: 'Verifikasi gagal: is_paused masih true setelah unpause' });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[Route] Unpause error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 router.post('/pause', async (req, res) => {
   const { phone } = req.body;
   if (!phone) return res.status(400).json({ error: "Phone number required" });
-  await pauseBot(phone);
-  res.json({ success: true });
+  try {
+    await pauseBot(phone);
+    const order = await loadOrder(phone);
+    if (!order || order.is_paused !== true) return res.status(500).json({ error: 'Verifikasi gagal: is_paused tidak berubah jadi true. Order: ' + JSON.stringify(order) });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[Route] Pause error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 router.get('/status/:phone', async (req, res) => {
