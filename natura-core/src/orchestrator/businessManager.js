@@ -9,14 +9,25 @@ async function sendMetaWhatsAppMessage(phone, text) {
     const phoneId = process.env.WA_PHONE_ID;
     if (!token || !phoneId) return;
 
-    try {
-        await axios.post(
-            `https://graph.facebook.com/v17.0/${phoneId}/messages`,
-            { messaging_product: 'whatsapp', to: phone, text: { body: text } },
-            { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
-        );
-    } catch (e) {
-        console.error('[Meta API] Gagal kirim WA ke', phone, ':', e.response ? JSON.stringify(e.response.data) : e.message);
+    // Retry up to 3x dengan exponential backoff jika gagal
+    for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+            await axios.post(
+                `https://graph.facebook.com/v21.0/${phoneId}/messages`,
+                { messaging_product: 'whatsapp', to: phone, text: { body: text } },
+                { 
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    timeout: 10000 // 10 detik timeout
+                }
+            );
+            return; // Berhasil, keluar dari loop
+        } catch (e) {
+            const errMsg = e.response ? JSON.stringify(e.response.data) : e.message;
+            console.error(`[Meta API] Percobaan ${attempt}/3 gagal kirim WA ke ${phone}:`, errMsg);
+            if (attempt < 3) {
+                await new Promise(resolve => setTimeout(resolve, attempt * 1000)); // 1s, 2s
+            }
+        }
     }
 }
 
@@ -160,9 +171,9 @@ async function processChatMeta(phone, text) {
             if (!replyText || typeof replyText !== 'string') continue; // Pengaman jika balasan kosong
             
             // Simulasi jeda pengetikan agar terasa seperti manusia asli (bukan bot instan)
-            // Kalkulasi: 40ms per karakter, min 1 detik, max 3.5 detik
-            const typingTime = Math.max(1000, Math.min(replyText.length * 40, 3500));
-            const delay = i === 0 ? Math.min(typingTime, 1500) : typingTime; // Pesan pertama jangan kelamaan
+            // Kalkulasi: 30ms per karakter, min 800ms, max 2 detik (dikurangi agar tidak timeout webhook)
+            const typingTime = Math.max(800, Math.min(replyText.length * 30, 2000));
+            const delay = i === 0 ? Math.min(typingTime, 1000) : typingTime; // Pesan pertama jangan kelamaan
             
             await new Promise(resolve => setTimeout(resolve, delay));
             await sendMetaWhatsAppMessage(phone, replyText);
