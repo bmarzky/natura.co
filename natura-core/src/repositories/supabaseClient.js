@@ -251,7 +251,6 @@ async function setPauseState(phone, isPaused) {
             order_id: `CTRL-${phone}`,
             phone: phone,
             payment_status: 'draft',
-            order_status: 'draft',
             is_paused: isPaused,
             total: 0
         }, { onConflict: 'order_id' });
