@@ -324,13 +324,27 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ phone: currentPhone })
                 });
+
+                if (!res.ok) {
+                    const errText = await res.text();
+                    alert(`Server error ${res.status}: ${errText}`);
+                    return;
+                }
+
                 const data = await res.json();
-                if (data.success) loadOrderDetails(currentPhone);
+                if (!data.success) {
+                    alert('Gagal: server tidak mengkonfirmasi perubahan. Response: ' + JSON.stringify(data));
+                    return;
+                }
+
+                // Tunggu sebentar agar Supabase propagate update-nya
+                await new Promise(resolve => setTimeout(resolve, 600));
+                await loadOrderDetails(currentPhone);
+
             } catch (err) {
                 alert("Gagal menghubungi server: " + err.message);
             } finally {
                 btnToggle.disabled = false;
-                loadOrderDetails(currentPhone);
             }
         }
 
