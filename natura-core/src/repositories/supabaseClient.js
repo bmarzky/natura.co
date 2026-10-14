@@ -222,6 +222,42 @@ async function getPendingOrders() {
     }
 }
 
+/**
+ * Mengubah status is_paused secara langsung — bekerja meski belum ada order
+ */
+async function setPauseState(phone, isPaused) {
+    if (!supabase) return;
+    try {
+        // Cek apakah ada order aktif untuk nomor ini
+        const { data } = await supabase
+            .from('bot_orders')
+            .select('order_id')
+            .eq('phone', phone)
+            .order('created_at', { ascending: false })
+            .limit(1);
+
+        if (data && data.length > 0) {
+            // Update record yang sudah ada
+            await supabase
+                .from('bot_orders')
+                .update({ is_paused: isPaused })
+                .eq('order_id', data[0].order_id);
+        } else {
+            // Buat record minimal jika belum ada order sama sekali
+            await supabase.from('bot_orders').insert({
+                order_id: `CTRL-${phone}`,
+                phone: phone,
+                payment_status: 'draft',
+                order_status: 'draft',
+                is_paused: isPaused,
+                total: 0
+            });
+        }
+    } catch (error) {
+        console.error('[Supabase] Error setting pause state:', error.message);
+    }
+}
+
 module.exports = {
     logChatMessage,
     upsertOrder,
@@ -231,5 +267,6 @@ module.exports = {
     markChatAsRead,
     getOrderByOrderId,
     updatePaymentStatusByOrderId,
-    getPendingOrders
+    getPendingOrders,
+    setPauseState
 };

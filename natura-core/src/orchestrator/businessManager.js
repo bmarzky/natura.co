@@ -1,6 +1,6 @@
 const { handleSalesChat } = require('../workers/sales/salesWorker');
 const { handlePaymentChat } = require('../workers/finance/financeWorker');
-const { loadOrder, upsertOrder } = require('../repositories/supabaseClient');
+const { loadOrder, upsertOrder, setPauseState } = require('../repositories/supabaseClient');
 const axios = require('axios');
 
 // Fungsi untuk menembak Meta WhatsApp API langsung (Diambil dari aiService.js lama)
@@ -153,19 +153,11 @@ async function getBotStatus(phone) {
 }
 
 async function unpauseBot(phone) {
-    const order = await loadOrder(phone);
-    if (order && Object.keys(order).length > 0) {
-        order.is_paused = false;
-        await upsertOrder(phone, order);
-    }
+    await setPauseState(phone, false);
 }
 
 async function pauseBot(phone) {
-    const order = await loadOrder(phone);
-    if (order && Object.keys(order).length > 0) {
-        order.is_paused = true;
-        await upsertOrder(phone, order);
-    }
+    await setPauseState(phone, true);
 }
 
 // ============================================================
