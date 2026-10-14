@@ -251,9 +251,12 @@ async function setPauseState(phone, isPaused) {
             order_id: `CTRL-${phone}`,
             phone: phone,
             product: 'Classic Black Forest',
+            quantity: 1,
+            total: 0,
+            delivery_date: '-',
+            delivery_address: '-',
             payment_status: 'draft',
-            is_paused: isPaused,
-            total: 0
+            is_paused: isPaused
         }, { onConflict: 'order_id' });
         if (insertError) throw new Error('Gagal insert control record: ' + insertError.message);
     }
